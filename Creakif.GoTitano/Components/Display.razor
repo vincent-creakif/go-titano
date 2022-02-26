@@ -1,0 +1,11 @@
+﻿@if (If && ChildContent is not null)
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter]
+    public bool If { get; set; }
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

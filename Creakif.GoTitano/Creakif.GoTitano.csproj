@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseRazorSourceGenerator>false</UseRazorSourceGenerator>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="Styles\app.css" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Humanizer.Core" Version="2.14.1" />
+		<PackageReference Include="MetaMask.Blazor" Version="1.6.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="wwwroot\public\css\" />
+	</ItemGroup>
+
+	<Target Name="PreBuildDev" AfterTargets="PreBuildEvent" Condition="'$(Configuration)' == 'Debug'">
+		<Exec Command="npm run build-css-dev" />
+	</Target>
+	<Target Name="PreBuildProd" AfterTargets="PreBuildEvent" Condition="'$(Configuration)' == 'Release'">
+		<Exec Command="npm run build-css-prod" />
+	</Target>
+
+</Project>

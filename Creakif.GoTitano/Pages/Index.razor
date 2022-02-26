@@ -1,0 +1,114 @@
+﻿@page "/"
+@inherits RootComponent
+@inject CoinGeckoService CoinGeckoService
+@inject MetaMaskService MetaMaskService
+@inject TitanoService TitanoService
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Go Titano!</PageTitle>
+
+<div class="w-2/12 p-3 flex flex-col">
+    <TitanoStats Price="_titanoPrice"
+                 Balances="_titanoBalances"
+                 Earnings="_titanoEarnings"
+                 @ref="_titanoStats" />
+</div>
+
+<div class="w-10/12">
+    <div class="p-4">
+        <Display If="_titanoPrice is not null && _titanoBalances is not null">
+            <TitanoForecast Items="_titanoForecastItems" />
+        </Display>
+    </div>
+</div>
+
+@code {
+    private TitanoStats _titanoStats;
+    private CoinGeckoSimplePriceItemModel _titanoPrice;
+    private TitanoBalancesModel _titanoBalances;
+    private TitanoEarningsModel _titanoEarnings;
+
+    private int _index;
+
+    private IReadOnlyCollection<TitanoForecastItem> _titanoForecastItems;
+
+    protected override async Task OnAfterFirstRenderAndParametersSetAsync()
+    {
+        RefreshState(true);
+        await CheckMetaMaskAsync();
+        RefreshState(false);
+    }
+
+    private async Task GetWeeklyForecastAsync()
+    {
+        _titanoForecastItems = await TitanoService.GetForecastItems(
+            _titanoPrice.UsdValue,
+            _titanoBalances.BalanceAmount);
+    }
+
+    private async Task CheckMetaMaskAsync()
+    {
+        var hasMetaMask = await MetaMaskService.HasMetaMask();
+        var isSiteConnected = await MetaMaskService.IsSiteConnected();
+
+        // TODO: take into account the case where Metamask is not connected (user not logged)
+        if (hasMetaMask && !isSiteConnected)
+        {
+            await MetaMaskService.ConnectMetaMask();
+        }
+        if (isSiteConnected)
+        {
+            await JsRuntime.InvokeVoidAsync(
+                "initAppAsync",
+                Coins.Contracts[Coins.Titano],
+                DotNetObjectReference.Create(this));
+        }
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task GetTitanoPriceAsync()
+    {
+        var currentPriceInUsd = _titanoPrice?.UsdValue ?? 0m;
+        _titanoPrice = await CoinGeckoService.GetTitanoPriceAsync(ct);
+
+        if (_titanoPrice?.HasChanged(currentPriceInUsd) == true && _titanoBalances is not null)
+        {
+            await GetWeeklyForecastAsync();
+        }
+
+        RefreshState(false);
+    }
+
+    [JSInvokable]
+    public async Task SetTitanoBalancesAsync(string balance)
+    {
+        var currentBalanceAmount = _titanoBalances?.BalanceAmount ?? 0;
+        _titanoBalances = TitanoService.GetBalances(
+            balance,
+            _titanoPrice.UsdValue);
+
+        if (_titanoBalances.HasChanged(currentBalanceAmount))
+        {
+            await GetWeeklyForecastAsync();
+        }
+
+        RefreshState(false);
+    }
+
+    [JSInvokable]
+    public void GetTitanoEarningsAsync()
+    {
+        _titanoEarnings = TitanoService.GetEarnings(
+            _titanoPrice.UsdValue,
+            _titanoBalances.BalanceAmount);
+
+        RefreshState(false);
+    }
+
+    [JSInvokable]
+    public async Task SetRebaseCountdownAsync()
+    {
+        await _titanoStats.SetRebaseCountdownAsync();
+    }
+}

@@ -1,0 +1,28 @@
+﻿@DisplayText
+
+@code {
+    [Parameter]
+    public decimal Value { get; set; }
+    [Parameter]
+    public string StringFormat { get; set; }
+    [Parameter]
+    public string Unit { get; set; }
+
+    private string DisplayText => GetDisplayText();
+
+    protected override void OnInitialized()
+    {
+        StringFormat = StringFormat ?? "N2";
+    }
+
+    private string GetDisplayText()
+    {
+        var displayText = Value.ToString(StringFormat, new CultureInfo("en-US"));
+        if (!string.IsNullOrWhiteSpace(Unit))
+        {
+            displayText += $" {Unit}";
+        }
+
+        return displayText;
+    }
+}

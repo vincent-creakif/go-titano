@@ -1,0 +1,20 @@
+﻿@DisplayText
+
+@code {
+    [Parameter]
+    public DateTimeOffset Value { get; set; }
+    [Parameter]
+    public string StringFormat { get; set; }
+
+    private string DisplayText => GetDisplayText();
+
+    protected override void OnInitialized()
+    {
+        StringFormat = StringFormat ?? "yyyy-MM-dd HH:mm:ss";
+    }
+
+    private string GetDisplayText()
+    {
+        return Value.ToString(StringFormat);
+    }
+}

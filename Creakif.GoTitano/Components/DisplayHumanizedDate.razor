@@ -1,0 +1,15 @@
+﻿@using Humanizer
+
+@DisplayText
+
+@code {
+    [Parameter]
+    public DateTimeOffset Value { get; set; }
+
+    private string DisplayText => GetDisplayText();
+
+    private string GetDisplayText()
+    {
+        return Value.Humanize();
+    }
+}

@@ -1,0 +1,47 @@
+﻿@implements IDisposable
+@inject IJSRuntime JsRuntime
+
+@code{
+    protected CancellationToken ct => _cts.Token;
+    protected bool LoadingData { get; set; }
+    protected bool IsDisposed { get; private set; }
+
+    private CancellationTokenSource _cts = new CancellationTokenSource();
+    private bool _alreadyRendered;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+        }
+
+        if (!IsDisposed)
+        {
+        }
+
+        if (IsDisposed || _alreadyRendered)
+        {
+            return;
+        }
+
+        _alreadyRendered = true;
+        await OnAfterFirstRenderAndParametersSetAsync();
+    }
+
+    virtual protected Task OnAfterFirstRenderAndParametersSetAsync() { return Task.CompletedTask; }
+
+    protected void RefreshState(bool loadingData)
+    {
+        LoadingData = loadingData;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+        IsDisposed = true;
+    }
+}

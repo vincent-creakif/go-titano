@@ -225,9 +225,3 @@ sql_scripts/export_db_dump_prod.cmd
 
 # Service Dependencies
 /**/ServiceDependencies
-
-# Front applications generated / shared files
-**/wwwroot/public/css/*.css
-**/wwwroot/public/js/*.js*
-**/wwwroot/public/images/shared/
-src/Front/**/Shared/Common/*.*

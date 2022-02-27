@@ -11,7 +11,7 @@ public class TitanoService
     private const int _rebaseFrequencyPerDay = 24 * _rebaseFrequencyPerHour;
     private const decimal _rebaseRoi = (_dailyRoiInPercent / _rebaseFrequencyPerDay) / 100;
 
-    private const int MaxForecastYears = 2;
+    private const int MaxForecastYears = 1;
 
     public static DateTime RebaseTime => DateTime.UtcNow.AddMinutes(5);
 

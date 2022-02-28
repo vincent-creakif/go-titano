@@ -13,37 +13,42 @@
         </Display>
         <Display If="Balances is not null">
             <div class="stat-value">
-                <span class="text-accent">$</span><DisplayDecimal Value="Balances.BalanceAmountValue" />
+                <div class="dropdown dropdown-hover initial-balance">
+                    <label tabindex="0">
+                        <span class="text-accent">$</span><DisplayDecimal Value="Balances.BalanceAmountValue" />
+                    </label>
+                    <ul tabindex="0" class="p-2 dropdown-content bg-base-300 w-auto font-normal text-xs">
+                        <Display If="InitialBalance is null">
+                            <span class="btn btn-ghost loading btn-sm btn-circle"></span>
+                        </Display>
+                        <Display If="InitialBalance is not null">
+                            <li>
+                                <strong>First deposit stats</strong>
+                                <span class="divider m-0"></span>
+                            </li>
+                            <li>
+                                <em>Amount:</em>
+                                <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
+                            </li>
+                            <li>
+                                <em>Date:</em>
+                                <DisplayDate Value="InitialBalance.CreatedAt" StringFormat="yyyy-MM-dd" />
+                            </li>
+                            <li>
+                                <em>Increased value:</em>
+                                <span class="text-accent">$</span><DisplayDecimal Value="@BalanceAmountValueIncrease(InitialBalance.Value, Balances.BalanceAmount)" />
+                            </li>
+                            <li>
+                                <em>Increased amount:</em>
+                                <DisplayDecimal Value="@BalanceAmountIncrease(InitialBalance.Value, Balances.BalanceAmount)" Unit="TITANO" />
+                            </li>
+                        </Display>
+                    </ul>
+                </div>
             </div>
             <div class="stat-desc pt-1 font-mono">
                 <DisplayDecimal Value="Balances.BalanceAmount" Unit="TITANO" />
             </div>
-            <Display If="InitialBalance is null">
-                <span class="btn btn-ghost loading btn-sm btn-circle"></span>
-            </Display>
-            <Display If="InitialBalance is not null">
-                <div class="stat-desc pt-1 font-mono hover:opacity-100">
-                    <div class="dropdown dropdown-hover initial-balance">
-                        <label tabindex="0">
-                            <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
-                        </label>
-                        <ul tabindex="0" class="p-2 dropdown-content bg-base-300 w-auto">
-                            <li>
-                                <span class="text-accent">$</span><DisplayDecimal Value="@BalanceAmountValueIncrease(InitialBalance.Value, Balances.BalanceAmount)" />
-                                <em>(increased value)</em>
-                            </li>
-                            <li>
-                                <DisplayDecimal Value="@BalanceAmountIncrease(InitialBalance.Value, Balances.BalanceAmount)" Unit="TITANO" />
-                                <em>(increased amount)</em>
-                            </li>
-                            <li>
-                                <DisplayDate Value="InitialBalance.CreatedAt" StringFormat="yyyy-MM-dd" />
-                                <em>(first deposit date)</em>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </Display>
         </Display>
     </div>
 

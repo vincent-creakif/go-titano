@@ -13,11 +13,22 @@
         </Display>
         <Display If="Balances is not null">
             <div class="stat-value">
-                <span class="text-accent">$</span><DisplayDecimal Value="@Balances.BalanceAmountValue" />
+                <span class="text-accent">$</span><DisplayDecimal Value="Balances.BalanceAmountValue" />
             </div>
             <div class="stat-desc pt-1 font-mono">
-                <DisplayDecimal Value="@Balances.BalanceAmount" Unit="TITANO" />
+                <DisplayDecimal Value="Balances.BalanceAmount" Unit="TITANO" />
             </div>
+            <Display If="InitialBalance is null">
+                <span class="btn btn-ghost loading btn-sm btn-circle"></span>
+            </Display>
+            <Display If="InitialBalance is not null">
+                <div class="stat-desc pt-1 font-mono">
+                    <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
+                    <span class="badge badge-secondary badge-outline text-xs">
+                        initial balance
+                    </span>
+                </div>
+            </Display>
         </Display>
     </div>
 
@@ -78,6 +89,8 @@
 @code {
     [Parameter]
     public CoinGeckoSimplePriceItemModel Price { get; set; }
+    [Parameter]
+    public BscScanResultItemModel InitialBalance { get; set; }
     [Parameter]
     public TitanoBalancesModel Balances { get; set; }
     [Parameter]

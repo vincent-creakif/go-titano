@@ -8,6 +8,8 @@ let _rebaseCountdownInterval;
 
 let _tokenAddress;
 
+let _walletAddress;
+
 const _tokenAbi =
 [
     // balanceOf
@@ -31,7 +33,7 @@ const _tokenAbi =
 async function initAppAsync(tokenAddress, dotNetObjectRef)
 {
     _tokenAddress = tokenAddress
-    _dotNetObjectRef = dotNetObjectRef
+    _dotNetObjectRef = dotNetObjectRef    
 
     if (typeof window.ethereum !== "undefined")
     {
@@ -41,6 +43,7 @@ async function initAppAsync(tokenAddress, dotNetObjectRef)
             await window.ethereum.request({ method: "eth_requestAccounts" })
             await setRebaseCountDownAsync()
             await getTitanoStatsAsync()
+            await getInitialBalanceAsync()
 
             _statsCheckInterval = setInterval(
                 async () => getTitanoStatsAsync(), _statsCheckIntervalDelayInSec * 1000)
@@ -70,10 +73,10 @@ async function getTitanoStatsAsync()
 async function getTitanoBalancesAsync()
 {
     const accounts = await _web3.eth.getAccounts()
-    const address = accounts[0]
+    _walletAddress = accounts[0]
 
     const tokenInst = new _web3.eth.Contract(_tokenAbi, _tokenAddress)
-    const balance = await tokenInst.methods.balanceOf(address).call()
+    const balance = await tokenInst.methods.balanceOf(_walletAddress).call()
 
     await _dotNetObjectRef.invokeMethodAsync(
         "SetTitanoBalancesAsync",
@@ -93,4 +96,8 @@ async function getTitanoEarningsAsync()
 async function setRebaseCountDownAsync()
 {
     await _dotNetObjectRef.invokeMethodAsync("SetRebaseCountdownAsync");
+}
+
+async function getInitialBalanceAsync() {
+    await _dotNetObjectRef.invokeMethodAsync("GetInitialBalanceAsync", _walletAddress)
 }

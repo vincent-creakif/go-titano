@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inherits RootComponent
+@inject BscScanService BscScanService
 @inject CoinGeckoService CoinGeckoService
 @inject MetaMaskService MetaMaskService
 @inject TitanoService TitanoService
@@ -9,6 +10,7 @@
 
 <div class="w-2/12 p-3 flex flex-col">
     <TitanoStats Price="_titanoPrice"
+                 InitialBalance="_initialBalance"
                  Balances="_titanoBalances"
                  Earnings="_titanoEarnings"
                  @ref="_titanoStats" />
@@ -27,6 +29,7 @@
     private CoinGeckoSimplePriceItemModel _titanoPrice;
     private TitanoBalancesModel _titanoBalances;
     private TitanoEarningsModel _titanoEarnings;
+    private BscScanResultItemModel _initialBalance;
 
     private int _index;
 
@@ -110,5 +113,12 @@
     public async Task SetRebaseCountdownAsync()
     {
         await _titanoStats.SetRebaseCountdownAsync();
+    }
+
+    [JSInvokable]
+    public async Task GetInitialBalanceAsync(string walletAddress)
+    {
+        _initialBalance = await BscScanService.GetInitialBalanceAsync(walletAddress, ct);
+        StateHasChanged();
     }
 }

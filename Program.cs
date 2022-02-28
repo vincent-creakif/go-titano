@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
+builder.Services.AddTransient<BscScanService>();
 builder.Services.AddTransient<CoinGeckoService>();
 builder.Services.AddTransient<TitanoService>();
 builder.Services.AddScoped<TimeZoneService>();

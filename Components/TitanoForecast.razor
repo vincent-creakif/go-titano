@@ -26,7 +26,7 @@
                     foreach (var month in Items.Months())
                     {
                         var yearHasChanged = 0 < currentYear && month.Date.Year != currentYear;
-                        
+
                         var daysItems = Items.Where(x => x.Day.Year == month.Year && x.Day.Month == month.Month);
                         var weekNumbers = daysItems.GroupBy(x => x.WeekNumber).Select(x => x.Key);
 

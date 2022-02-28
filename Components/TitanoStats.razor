@@ -22,11 +22,26 @@
                 <span class="btn btn-ghost loading btn-sm btn-circle"></span>
             </Display>
             <Display If="InitialBalance is not null">
-                <div class="stat-desc pt-1 font-mono">
-                    <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
-                    <span class="badge badge-secondary badge-outline text-xs">
-                        initial balance
-                    </span>
+                <div class="stat-desc pt-1 font-mono hover:opacity-100">
+                    <div class="dropdown dropdown-hover initial-balance">
+                        <label tabindex="0">
+                            <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
+                        </label>
+                        <ul tabindex="0" class="p-2 dropdown-content bg-base-300 w-auto">
+                            <li>
+                                <span class="text-accent">$</span><DisplayDecimal Value="@BalanceAmountValueIncrease(InitialBalance.Value, Balances.BalanceAmount)" />
+                                <em>(increased value)</em>
+                            </li>
+                            <li>
+                                <DisplayDecimal Value="@BalanceAmountIncrease(InitialBalance.Value, Balances.BalanceAmount)" Unit="TITANO" />
+                                <em>(increased amount)</em>
+                            </li>
+                            <li>
+                                <DisplayDate Value="InitialBalance.CreatedAt" StringFormat="yyyy-MM-dd" />
+                                <em>(first deposit date)</em>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </Display>
         </Display>
@@ -116,7 +131,17 @@
         {
             await JsRuntime.InvokeVoidAsync("getTitanoStatsAsync");
         }
-        
+
         StateHasChanged();
+    }
+
+    private decimal BalanceAmountIncrease(decimal initialBalance, decimal balanceAmount)
+    {
+        return balanceAmount - initialBalance;
+    }
+
+    private decimal BalanceAmountValueIncrease(decimal initialBalance, decimal balanceAmount)
+    {
+        return BalanceAmountIncrease(initialBalance, balanceAmount) * Price.UsdValue;
     }
 }

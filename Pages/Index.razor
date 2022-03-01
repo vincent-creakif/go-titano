@@ -116,9 +116,8 @@
         if (_titanoPrice?.HasChanged(currentPriceInUsd) == true && _titanoBalances is not null)
         {
             await GetWeeklyForecastAsync();
+            RefreshState(false);
         }
-
-        RefreshState(false);
     }
 
     [JSInvokable]
@@ -132,9 +131,8 @@
         if (_titanoBalances.HasChanged(currentBalanceAmount))
         {
             await GetWeeklyForecastAsync();
+            RefreshState(false);
         }
-
-        RefreshState(false);
     }
 
     [JSInvokable]

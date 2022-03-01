@@ -5,73 +5,79 @@ let _statsCheckInterval;
 let _statsCheckIntervalDelayInSec = 10;
 
 let _rebaseCountdownInterval;
-
 let _tokenAddress;
-
 let _walletAddress;
 
 const _tokenAbi =
-[
-    // balanceOf
-    {
-        'constant': true,
-        'inputs': [{ 'name': '_owner', 'type': 'address' }],
-        'name': 'balanceOf',
-        'outputs': [{ 'name': 'balance', 'type': 'uint256' }],
-        'type': 'function'
-    },
-    // decimals
-    {
-        'constant': true,
-        'inputs': [],
-        'name': 'decimals',
-        'outputs': [{ 'name': '', 'type': 'uint8' }],
-        'type': 'function'
-    }
-];
+    [
+        // balanceOf
+        {
+            'constant': true,
+            'inputs': [{ 'name': '_owner', 'type': 'address' }],
+            'name': 'balanceOf',
+            'outputs': [{ 'name': 'balance', 'type': 'uint256' }],
+            'type': 'function'
+        },
+        // decimals
+        {
+            'constant': true,
+            'inputs': [],
+            'name': 'decimals',
+            'outputs': [{ 'name': '', 'type': 'uint8' }],
+            'type': 'function'
+        }
+    ];
 
-async function initAppAsync(tokenAddress, dotNetObjectRef)
-{
+async function connectWalletAsync(walletName, tokenAddress, dotNetObjectRef) {
     _tokenAddress = tokenAddress
-    _dotNetObjectRef = dotNetObjectRef    
+    _dotNetObjectRef = dotNetObjectRef
 
-    if (typeof window.ethereum !== "undefined")
-    {
-        _web3 = new Web3(window.ethereum)
-        try
-        {
-            await window.ethereum.request({ method: "eth_requestAccounts" })
-            await setRebaseCountDownAsync()
-            await getTitanoStatsAsync()
-            await getInitialBalanceAsync()
+    try {
+        if (walletName === "metamask") {
+            if (await checkMetaMaskAsync()) {
+                _web3 = new Web3(window.ethereum)
+                try {
+                    await setRebaseCountDownAsync()
+                    await getTitanoStatsAsync()
+                    await getInitialBalanceAsync()
 
-            _statsCheckInterval = setInterval(
-                async () => getTitanoStatsAsync(), _statsCheckIntervalDelayInSec * 1000)
+                    _statsCheckInterval = setInterval(
+                        async () => getTitanoStatsAsync(), _statsCheckIntervalDelayInSec * 1000)
 
-            _rebaseCountdownInterval = setInterval(
-                async () => setRebaseCountDownAsync(), 1000)
+                    _rebaseCountdownInterval = setInterval(
+                        async () => setRebaseCountDownAsync(), 1000)
+
+                    return walletName
+                }
+                catch {
+                }
+            }
         }
-        catch (e)
-        {
-            return false
-        }
+    }
+    catch (e) {
+        console.error(e)
     }
 }
 
-function getTimezoneOffset()
-{
+function resetApp() {
+    clearInterval(_statsCheckInterval)
+    clearInterval(_rebaseCountdownInterval)
+    _tokenAddress = null
+    _walletAddress = null
+    _dotNetObjectRef = null
+}
+
+function getTimezoneOffset() {
     return new Date().getTimezoneOffset()
 }
 
-async function getTitanoStatsAsync()
-{
+async function getTitanoStatsAsync() {
     await getTitanoPriceAsync()
     await getTitanoBalancesAsync()
     await getTitanoEarningsAsync()
 }
 
-async function getTitanoBalancesAsync()
-{
+async function getTitanoBalancesAsync() {
     const accounts = await _web3.eth.getAccounts()
     _walletAddress = accounts[0]
 
@@ -83,21 +89,51 @@ async function getTitanoBalancesAsync()
         _web3.utils.fromWei(balance))
 }
 
-async function getTitanoPriceAsync()
-{
+async function getTitanoPriceAsync() {
     await _dotNetObjectRef.invokeMethodAsync("GetTitanoPriceAsync")
 }
 
-async function getTitanoEarningsAsync()
-{
+async function getTitanoEarningsAsync() {
     await _dotNetObjectRef.invokeMethodAsync("GetTitanoEarningsAsync")
 }
 
-async function setRebaseCountDownAsync()
-{
+async function setConnectedWalletAsync(wallet) {
+    await _dotNetObjectRef.invokeMethodAsync("SetConnectedWalletAsync", wallet);
+}
+
+async function setRebaseCountDownAsync() {
     await _dotNetObjectRef.invokeMethodAsync("SetRebaseCountdownAsync");
 }
 
 async function getInitialBalanceAsync() {
     await _dotNetObjectRef.invokeMethodAsync("GetInitialBalanceAsync", _walletAddress)
+}
+
+async function checkMetaMaskAsync() {
+    // MetaMask is not installed
+    if (!window.ethereum) {
+        return false
+    }
+
+    // Listen to accountsChanged event to handle disconnection
+    ethereum.on("accountsChanged", onMetaMaskAccountsChanged)
+
+    if (!ethereum.selectedAddress || ethereum.selectedAddress == null) {
+        try {
+            await window.ethereum.request({ method: "eth_requestAccounts" })
+            return true
+        }
+        catch {
+            return false
+        }
+    }
+
+    return true
+}
+
+async function onMetaMaskAccountsChanged(accounts) {
+    if (accounts.length == 0) {
+        ethereum.removeListener("accountsChanged", onMetaMaskAccountsChanged)
+        await _dotNetObjectRef.invokeMethodAsync("DisconnectWalletAsync")
+    }
 }

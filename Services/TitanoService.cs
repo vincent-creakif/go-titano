@@ -53,7 +53,8 @@ public class TitanoService
         var totalDays = (localDatetime.AddYears(MaxForecastYears) - localDatetime).TotalDays - 1;
 
         var remainingTime = TimeSpan.FromHours(24) - localDatetime.TimeOfDay;
-        var remainingRebases = ((remainingTime.Hours + 1) * _rebaseFrequencyPerHour);
+        var remainingRebases = remainingTime.Hours * _rebaseFrequencyPerHour;
+        remainingRebases += ((remainingTime.Minutes - remainingTime.Minutes % 30) / 30) + 1;
 
         TitanoForecastItem GetDailyForecast(int rebases)
         {

@@ -1,5 +1,3 @@
-using MetaMask.Blazor;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -10,8 +8,6 @@ builder.Services.AddTransient<BscScanService>();
 builder.Services.AddTransient<CoinGeckoService>();
 builder.Services.AddTransient<TitanoService>();
 builder.Services.AddScoped<TimeZoneService>();
-
-builder.Services.AddMetaMaskBlazor();
 
 var app = builder.Build();
 

@@ -2,7 +2,6 @@
 @inherits RootComponent
 @inject BscScanService BscScanService
 @inject CoinGeckoService CoinGeckoService
-@inject MetaMaskService MetaMaskService
 @inject TitanoService TitanoService
 @inject IJSRuntime JsRuntime
 
@@ -16,8 +15,41 @@
                  @ref="_titanoStats" />
 </div>
 
-<div class="w-10/12">
-    <div class="p-4">
+<div class="w-10/12 p-4">
+
+    <div class="columns-2">
+
+        <div class="btn-group opacity-90">
+            <Display If="_titanoPrice is null || _titanoBalances is null">
+                &nbsp;
+            </Display>
+            <Display If="_titanoPrice is not null && _titanoBalances is not null">
+                @foreach (var forecastView in Enum.GetNames<ForecastView>())
+                {
+                    var enumValue = Enum.Parse<ForecastView>(forecastView);
+                    <button class="btn btn-sm @(_forecastView == enumValue ? "btn-info" : "btn-outline")" @onclick="() => ForecastViewChanged(enumValue)">
+                        @forecastView
+                    </button>
+                }
+            </Display>
+        </div>
+
+        <div class="text-right">
+            <Display If="_connectedWallet is null">
+                <button class="btn btn-sm btn-neutral" @onclick="async() => await ConnectWalletAsync()">
+                    Connect Wallet
+                </button>
+            </Display>
+            <Display If="_connectedWallet is not null">
+                <button class="btn btn-sm btn-warning" @onclick="async() => await DisconnectWalletAsync()">
+                    Disconnect
+                </button>
+            </Display>
+        </div>
+
+    </div>
+
+    <div class="pt-9">
         <Display If="_titanoPrice is not null && _titanoBalances is not null">
             <TitanoForecast Items="_titanoForecastItems" />
         </Display>
@@ -30,16 +62,13 @@
     private TitanoBalancesModel _titanoBalances;
     private TitanoEarningsModel _titanoEarnings;
     private BscScanResultItemModel _initialBalance;
-
-    private int _index;
-
     private IReadOnlyCollection<TitanoForecastItem> _titanoForecastItems;
+    private ForecastView _forecastView;
+    private string _connectedWallet;
 
     protected override async Task OnAfterFirstRenderAndParametersSetAsync()
     {
-        RefreshState(true);
-        await CheckMetaMaskAsync();
-        RefreshState(false);
+        await ConnectWalletAsync();
     }
 
     private async Task GetWeeklyForecastAsync()
@@ -49,24 +78,28 @@
             _titanoBalances.BalanceAmount);
     }
 
-    private async Task CheckMetaMaskAsync()
+    private async Task ConnectWalletAsync()
     {
-        var hasMetaMask = await MetaMaskService.HasMetaMask();
-        var isSiteConnected = await MetaMaskService.IsSiteConnected();
+        _connectedWallet = await JsRuntime.InvokeAsync<string>(
+            "connectWalletAsync",
+            Wallets.Metamask,
+            Coins.Contracts[Coins.Titano],
+            DotNetObjectReference.Create(this));
 
-        // TODO: take into account the case where Metamask is not connected (user not logged)
-        if (hasMetaMask && !isSiteConnected)
-        {
-            await MetaMaskService.ConnectMetaMask();
-        }
-        if (isSiteConnected)
-        {
-            await JsRuntime.InvokeVoidAsync(
-                "initAppAsync",
-                Coins.Contracts[Coins.Titano],
-                DotNetObjectReference.Create(this));
-        }
-        StateHasChanged();
+        RefreshState(false);
+    }
+
+    [JSInvokable]
+    public async Task DisconnectWalletAsync()
+    {
+        await JsRuntime.InvokeVoidAsync("resetApp");
+
+        _connectedWallet = null;
+        _titanoPrice = null;
+        _titanoBalances = null;
+        _titanoEarnings = null;
+        _titanoForecastItems = null;
+        RefreshState(false);
     }
 
     [JSInvokable]
@@ -112,7 +145,10 @@
     [JSInvokable]
     public async Task SetRebaseCountdownAsync()
     {
-        await _titanoStats.SetRebaseCountdownAsync();
+        if (_titanoStats is not null)
+        {
+            await _titanoStats.SetRebaseCountdownAsync();
+        }
     }
 
     [JSInvokable]
@@ -120,5 +156,17 @@
     {
         _initialBalance = await BscScanService.GetInitialBalanceAsync(walletAddress, ct);
         StateHasChanged();
+    }
+
+    private void ForecastViewChanged(ForecastView forecastView)
+    {
+        _forecastView = forecastView;
+    }
+
+    private enum ForecastView
+    {
+        Yearly,
+        Weekly,
+        Daily
     }
 }

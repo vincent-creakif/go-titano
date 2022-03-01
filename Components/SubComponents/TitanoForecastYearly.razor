@@ -72,7 +72,7 @@
 </div>
 
 @code {
-    [Parameter]
+    [CascadingParameter(Name="Items")]
     public IReadOnlyCollection<TitanoForecastItem> Items { get; set; }
 
     private int _yearOffset;

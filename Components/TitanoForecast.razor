@@ -1,14 +1,16 @@
 ﻿<Display If="Items is not null">
-    <Display If="View == ForecastViewEnum.Yearly">
-        <TitanoForecastYearly Items="Items" />
-    </Display>
-    <Display If="View == ForecastViewEnum.Weekly">
-        <TitanoForecastWeekly Items="Items" />
-    </Display>
+    <CascadingValue Name="Items" Value="Items">
+        <Display If="View == ForecastViewEnum.Yearly">
+            <TitanoForecastYearly />
+        </Display>
+        <Display If="View == ForecastViewEnum.Weekly">
+            <TitanoForecastWeekly />
+        </Display>
+    </CascadingValue>
 </Display>
 
 @code {
-    [Parameter]
+    [CascadingParameter(Name="Items")]
     public IReadOnlyCollection<TitanoForecastItem> Items { get; set; }
     [Parameter]
     public ForecastViewEnum View { get; set; }

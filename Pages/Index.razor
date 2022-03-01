@@ -7,7 +7,7 @@
 
 <PageTitle>Go Titano!</PageTitle>
 
-<div class="w-2/12 p-3 flex flex-col">
+<div class="w-2/12 p-3 pt-0 flex flex-col">
     <TitanoStats Price="_titanoPrice"
                  InitialBalance="_initialBalance"
                  Balances="_titanoBalances"
@@ -16,7 +16,6 @@
 </div>
 
 <div class="w-10/12 p-4">
-
     <div class="columns-2">
 
         <div class="btn-group opacity-90">
@@ -46,7 +45,6 @@
                 </button>
             </Display>
         </div>
-
     </div>
 
     <div class="pt-9">
@@ -80,12 +78,19 @@
 
     private async Task ConnectWalletAsync()
     {
-        _connectedWallet = await JsRuntime.InvokeAsync<string>(
+        await JsRuntime.InvokeAsync<string>(
             "connectWalletAsync",
             Wallets.Metamask,
             Coins.Contracts[Coins.Titano],
             DotNetObjectReference.Create(this));
 
+        RefreshState(false);
+    }
+
+    [JSInvokable]
+    public void SetConnectedWalletAsync(string wallet)
+    {
+        _connectedWallet = wallet;
         RefreshState(false);
     }
 

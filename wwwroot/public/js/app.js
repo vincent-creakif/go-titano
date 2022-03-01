@@ -37,6 +37,7 @@ async function connectWalletAsync(walletName, tokenAddress, dotNetObjectRef) {
             if (await checkMetaMaskAsync()) {
                 _web3 = new Web3(window.ethereum)
                 try {
+                    await setConnectedWalletAsync(walletName)
                     await setRebaseCountDownAsync()
                     await getTitanoStatsAsync()
                     await getInitialBalanceAsync()
@@ -46,8 +47,6 @@ async function connectWalletAsync(walletName, tokenAddress, dotNetObjectRef) {
 
                     _rebaseCountdownInterval = setInterval(
                         async () => setRebaseCountDownAsync(), 1000)
-
-                    return walletName
                 }
                 catch {
                 }

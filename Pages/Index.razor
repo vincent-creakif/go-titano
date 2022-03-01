@@ -16,23 +16,7 @@
 </div>
 
 <div class="w-10/12 p-4">
-    <div class="columns-2">
-
-        <div class="btn-group opacity-90">
-            <Display If="_titanoPrice is null || _titanoBalances is null">
-                &nbsp;
-            </Display>
-            <Display If="_titanoPrice is not null && _titanoBalances is not null">
-                @foreach (var forecastView in Enum.GetNames<ForecastViewEnum>())
-                {
-                    var enumValue = Enum.Parse<ForecastViewEnum>(forecastView);
-                    <button class="btn btn-sm @(_forecastView == enumValue ? "btn-info" : "btn-outline")" @onclick="() => ForecastViewChanged(enumValue)">
-                        @forecastView
-                    </button>
-                }
-            </Display>
-        </div>
-
+    <div class="columns-1">
         <div class="text-right">
             <Display If="_connectedWallet is null">
                 <button class="btn btn-sm btn-neutral" @onclick="async() => await ConnectWalletAsync()">
@@ -47,12 +31,10 @@
         </div>
     </div>
 
-    <div class="pt-9">
+    <div class="pt-6">
         <Display If="_titanoPrice is not null && _titanoBalances is not null">
             <CascadingValue Name="Items" Value="_titanoForecastItems">
-                <CascadingValue Name="View" Value="_forecastView">
-                    <TitanoForecast />
-                </CascadingValue>
+                <TitanoForecast />
             </CascadingValue>
         </Display>
     </div>
@@ -64,8 +46,7 @@
     private TitanoBalancesModel _titanoBalances;
     private TitanoEarningsModel _titanoEarnings;
     private BscScanResultItemModel _initialBalance;
-    private IReadOnlyCollection<TitanoForecastItem> _titanoForecastItems;
-    private ForecastViewEnum _forecastView;
+    private IReadOnlyCollection<TitanoForecastItem> _titanoForecastItems;    
     private string _connectedWallet;
 
     protected override async Task OnAfterFirstRenderAndParametersSetAsync()
@@ -163,10 +144,5 @@
     {
         _initialBalance = await BscScanService.GetInitialBalanceAsync(walletAddress, ct);
         StateHasChanged();
-    }
-
-    private void ForecastViewChanged(ForecastViewEnum forecastView)
-    {
-        _forecastView = forecastView;
     }
 }

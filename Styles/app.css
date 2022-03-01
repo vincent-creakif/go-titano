@@ -26,6 +26,12 @@ body {
     letter-spacing: .02rem;
 }
 
+.titano {
+    display: inline-flex;
+    height: 74px;
+    justify-content: center;
+}
+
 .stat {
     border-color: rgba(128, 128, 128, .6);
 }

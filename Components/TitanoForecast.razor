@@ -1,10 +1,26 @@
 ﻿<div class="overflow-x-auto">
-    <button class="btn btn-xs btn-outline" @onclick="PreviousPage" disabled=@(_yearOffset == 0)>
-        previous
-    </button>
-    <button class="btn btn-xs btn-outline" @onclick="NextPage">
-        next
-    </button>
+    <div class="flex flex-wrap pb-5">
+        <div class="w-2/12">
+            <button class="btn btn-xs btn-outline" @onclick="PreviousPage" disabled=@IsPreviousPageDisabled()>
+                previous
+            </button>
+            <button class="btn btn-xs btn-outline" @onclick="NextPage">
+                next
+            </button>
+        </div>
+        
+        <div class="w-10/12">
+            <div class="btn-group opacity-90 flex justify-end">
+                @foreach (var forecastView in Enum.GetNames<ForecastViewEnum>())
+                {
+                    var enumValue = Enum.Parse<ForecastViewEnum>(forecastView);
+                    <button class="btn btn-sm @(_forecastView == enumValue ? "btn-info" : "btn-outline")" @onclick="() => ForecastViewChanged(enumValue)">
+                        @forecastView
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
 
     <table class="table table-compact w-full overflow-y-scroll">
         <thead class="border-b border-gray-50 border-opacity-30">
@@ -34,6 +50,7 @@
                     var forecastDate = forecastDateItems.ElementAt(i);
 
                     var daysItems = ForecastDateItems(forecastDate);
+                    var day = forecastDateItems.ElementAt(i);
 
                     var lastDay = daysItems.Last();
                     var balanceAmountValue = lastDay.BalanceAmountValue;
@@ -43,9 +60,23 @@
 
                     <tr>
                         <td class="font-mono align-top" width="15%">
-                            <div class="badge badge-secondary badge-outline text-xs">
-                                @($"{forecastDate.Date.Year}-{forecastDate.Date.Month:00}")
-                            </div>
+                            <Display If="_forecastView == ForecastViewEnum.Yearly">
+                                <div class="badge badge-secondary badge-outline text-xs">
+                                    @($"{forecastDate.Date.Year}-{forecastDate.Date.Month:00}")
+                                </div>
+                            </Display>
+                            <Display If="_forecastView == ForecastViewEnum.Weekly">
+                                <Display If="_weekOffset == 0">
+                                    <span class="text-secondary text-xs">
+                                        <DisplayDate Value="day" StringFormat="dddd" />
+                                    </span>
+                                </Display>
+                                <Display If="_weekOffset > 0">
+                                    <span class="badge badge-secondary badge-outline text-xs">
+                                        <DisplayDate Value="day" StringFormat="yyyy-MM-dd" />
+                                    </span>
+                                </Display>
+                            </Display>
                         </td>
                         <td>
                             <span class="text-accent">$</span><DisplayDecimal Value="balanceAmountValue" />
@@ -69,9 +100,8 @@
 @code {
     [CascadingParameter(Name = "Items")]
     public IReadOnlyCollection<TitanoForecastItem> Items { get; set; }
-    [CascadingParameter(Name = "View")]
-    public ForecastViewEnum View { get; set; }
 
+    private ForecastViewEnum _forecastView;
     private int _yearOffset;
     private int _weekOffset;
 
@@ -86,7 +116,7 @@
 
     private IReadOnlyCollection<DateTime> ForecastItems()
     {
-        return View switch
+        return _forecastView switch
         {
             ForecastViewEnum.Yearly => Items.Months(_yearOffset),
             ForecastViewEnum.Weekly => Items.WeekDays(_weekOffset),
@@ -96,7 +126,7 @@
 
     private IEnumerable<TitanoForecastItem> ForecastDateItems(DateTime forecastDate)
     {
-        return View switch
+        return _forecastView switch
         {
             ForecastViewEnum.Yearly => Items.Where(x => x.Day.Year == forecastDate.Year && x.Day.Month == forecastDate.Month),
             ForecastViewEnum.Weekly => Items.Where(x => x.Day.Date == forecastDate.Date),
@@ -104,9 +134,14 @@
         };
     }
 
+    private void ForecastViewChanged(ForecastViewEnum forecastView)
+    {
+        _forecastView = forecastView;
+    }
+
     private void PreviousPage()
     {
-        switch (View)
+        switch (_forecastView)
         {
             case ForecastViewEnum.Yearly:
                 _yearOffset--;
@@ -120,7 +155,7 @@
 
     private void NextPage()
     {
-        switch (View)
+        switch (_forecastView)
         {
             case ForecastViewEnum.Yearly:
                 _yearOffset++;
@@ -130,5 +165,14 @@
                 break;
         }
         StateHasChanged();
+    }
+
+    private bool IsPreviousPageDisabled()
+    {
+        return _forecastView switch
+        {
+            ForecastViewEnum.Yearly => _yearOffset == 0,
+            ForecastViewEnum.Weekly => _weekOffset == 0
+        };
     }
 }

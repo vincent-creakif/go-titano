@@ -1,0 +1,95 @@
+﻿<div class="overflow-x-auto">
+    <button class="btn btn-xs btn-outline" @onclick="PreviousYear" disabled=@(_yearOffset == 0)>
+        previous
+    </button>
+    <button class="btn btn-xs btn-outline" @onclick="NextYear">
+        next
+    </button>
+
+    <table class="table table-compact w-full overflow-y-scroll">
+        <thead class="border-b border-gray-50 border-opacity-30">
+            <tr class="align-top">
+                <th class="align-top">
+                    Month
+                </th>
+                <th>
+                    Your Balance
+                    <div class="opacity-70 text-xs lowercase font-mono font-normal">
+                        (end of the month)
+                    </div>
+                </th>
+                <th>
+                    Earnings
+                    <div class="opacity-70 text-xs lowercase font-mono font-normal">
+                        (upcoming)
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50 divide-opacity-10">
+            @{
+                var currentYear = 0;
+                foreach (var month in Items.Months(_yearOffset))
+                {
+                    var yearHasChanged = 0 < currentYear && month.Date.Year != currentYear;
+
+                    var daysItems = Items.Where(x => x.Day.Year == month.Year && x.Day.Month == month.Month);
+
+                    var balanceAmountValue = daysItems.Last().BalanceAmountValue;
+                    var balanceAmount = daysItems.Last().BalanceAmount;
+                    var rebaseAmount = daysItems.Sum(x => x.DailyRebaseAmounts.Sum());
+                    var earnings = daysItems.Sum(x => x.DailyRebaseAmountValues.Sum());
+
+                    <tr>
+                        <td class="font-mono align-top" width="15%">
+                            <div class="badge badge-secondary badge-outline text-xs">
+                                @($"{month.Date.Year}-{month.Date.Month:00}")
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-accent">$</span><DisplayDecimal Value="balanceAmountValue" />
+                            <div class="stat-desc pt-1 font-mono">
+                                <DisplayDecimal Value="balanceAmount" Unit="TITANO" />
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-accent">$</span><DisplayDecimal Value="earnings" />
+                            <div class="stat-desc pt-1 font-mono">
+                                <DisplayDecimal Value="rebaseAmount" Unit="TITANO" />
+                            </div>
+                        </td>
+                    </tr>
+
+                    currentYear = month.Date.Year;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public IReadOnlyCollection<TitanoForecastItem> Items { get; set; }
+
+    private int _yearOffset;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _yearOffset = 0;
+        }
+    }
+
+    private void PreviousYear()
+    {
+        _yearOffset--;
+        StateHasChanged();
+    }
+
+    private void NextYear()
+    {
+        _yearOffset++;
+        StateHasChanged();
+    }
+}

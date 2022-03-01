@@ -23,9 +23,9 @@
                 &nbsp;
             </Display>
             <Display If="_titanoPrice is not null && _titanoBalances is not null">
-                @foreach (var forecastView in Enum.GetNames<ForecastView>())
+                @foreach (var forecastView in Enum.GetNames<ForecastViewEnum>())
                 {
-                    var enumValue = Enum.Parse<ForecastView>(forecastView);
+                    var enumValue = Enum.Parse<ForecastViewEnum>(forecastView);
                     <button class="btn btn-sm @(_forecastView == enumValue ? "btn-info" : "btn-outline")" @onclick="() => ForecastViewChanged(enumValue)">
                         @forecastView
                     </button>
@@ -49,7 +49,7 @@
 
     <div class="pt-9">
         <Display If="_titanoPrice is not null && _titanoBalances is not null">
-            <TitanoForecast Items="_titanoForecastItems" />
+            <TitanoForecast Items="_titanoForecastItems" View="_forecastView" />
         </Display>
     </div>
 </div>
@@ -61,7 +61,7 @@
     private TitanoEarningsModel _titanoEarnings;
     private BscScanResultItemModel _initialBalance;
     private IReadOnlyCollection<TitanoForecastItem> _titanoForecastItems;
-    private ForecastView _forecastView;
+    private ForecastViewEnum _forecastView;
     private string _connectedWallet;
 
     protected override async Task OnAfterFirstRenderAndParametersSetAsync()
@@ -163,15 +163,8 @@
         StateHasChanged();
     }
 
-    private void ForecastViewChanged(ForecastView forecastView)
+    private void ForecastViewChanged(ForecastViewEnum forecastView)
     {
         _forecastView = forecastView;
-    }
-
-    private enum ForecastView
-    {
-        Yearly,
-        Weekly,
-        Daily
     }
 }

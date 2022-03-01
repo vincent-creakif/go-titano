@@ -1,91 +1,15 @@
 ﻿<Display If="Items is not null">
-    <div class="overflow-x-auto">
-        <table class="table table-compact w-full overflow-y-scroll">
-            <thead class="border-b border-gray-50 border-opacity-30">
-                <tr class="align-top">
-                    <th class="align-top">
-                        Month
-                    </th>
-                    <th>
-                        Your Balance
-                        <div class="opacity-70 text-xs lowercase font-mono font-normal">
-                            (end of the month)
-                        </div>
-                    </th>
-                    <th>
-                        Earnings
-                        <div class="opacity-70 text-xs lowercase font-mono font-normal">
-                            (upcoming)
-                        </div>
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50 divide-opacity-10">
-                @{
-                    var currentYear = 0;
-                    foreach (var month in Items.Months())
-                    {
-                        var yearHasChanged = 0 < currentYear && month.Date.Year != currentYear;
-
-                        var daysItems = Items.Where(x => x.Day.Year == month.Year && x.Day.Month == month.Month);
-                        var weekNumbers = daysItems.GroupBy(x => x.WeekNumber).Select(x => x.Key);
-
-                        var balanceAmountValue = daysItems.Last().BalanceAmountValue;
-                        var balanceAmount = daysItems.Last().BalanceAmount;
-                        var rebaseAmount = daysItems.Sum(x => x.DailyRebaseAmounts.Sum());
-                        var earnings = daysItems.Sum(x => x.DailyRebaseAmountValues.Sum());
-
-                        <tr>
-                            <td class="font-mono align-top">
-                                <div class="badge @(yearHasChanged ? "badge-accent" : "badge-secondary") badge-outline text-xs">
-                                    @($"{month.Date.Year}-{month.Date.Month:00}")
-                                </div>
-                            </td>
-                            <td>
-                                <span class="text-accent">$</span><DisplayDecimal Value="balanceAmountValue" />
-                                <div class="stat-desc pt-1 font-mono">
-                                    <DisplayDecimal Value="balanceAmount" Unit="TITANO" />
-                                    <table>
-                                        @foreach (var weekNumber in weekNumbers)
-                                        {
-                                            var weekItems = daysItems.Where(x => x.WeekNumber == weekNumber);
-                                            var firstDayOfWeek = weekItems.First().Day;
-                                            var lastDayOfWeek = weekItems.Last().Day;
-
-                                            var balanceAmount2 = weekItems.Sum(x => x.DailyRebaseAmounts.Sum());
-                                            /*var balanceAmount2 = weekItems.Sum(x => x.BalanceAmount);
-                                            var rebaseAmount2 = weekItems.Sum(x => x.DailyRebaseAmounts.Sum());
-                                            var earnings2 = weekItems.Sum(x => x.DailyRebaseAmountValues.Sum());*/
-
-                                            @*<tr>
-                                                <td>
-                                                    <DisplayDecimal Value="balanceAmount2" Unit="TITANO" />
-                                                    <DisplayDate Value="firstDayOfWeek" StringFormat="yyyy-MM-dd" />
-                                                    ->
-                                                    <DisplayDate Value="lastDayOfWeek" StringFormat="yyyy-MM-dd" />
-                                                </td>
-                                            </tr>*@
-                                        }
-                                    </table>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="text-accent">$</span><DisplayDecimal Value="earnings" />
-                                <div class="stat-desc pt-1 font-mono">
-                                    <DisplayDecimal Value="rebaseAmount" Unit="TITANO" />
-                                </div>
-                            </td>
-                        </tr>
-
-                        currentYear = month.Date.Year;
-                    }
-                }
-            </tbody>
-        </table>
-    </div>
+    <Display If="View == ForecastViewEnum.Yearly">
+        <TitanoForecastYearly Items="Items" />
+    </Display>
+    <Display If="View == ForecastViewEnum.Weekly">
+        <TitanoForecastWeekly Items="Items" />
+    </Display>
 </Display>
 
 @code {
     [Parameter]
     public IReadOnlyCollection<TitanoForecastItem> Items { get; set; }
+    [Parameter]
+    public ForecastViewEnum View { get; set; }
 }

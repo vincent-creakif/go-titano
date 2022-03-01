@@ -1,5 +1,5 @@
 ﻿<div class="overflow-x-auto">
-    <div class="flex flex-wrap pb-5">
+    <div class="flex flex-wrap pb-5 overflow-hidden">
         <div class="w-2/12">
             <button class="btn btn-xs btn-outline" @onclick="PreviousPage" disabled=@IsPreviousPageDisabled()>
                 previous
@@ -78,7 +78,7 @@
                                 </Display>
                             </Display>
                         </td>
-                        <td>
+                        <td width="25%">
                             <span class="text-accent">$</span><DisplayDecimal Value="balanceAmountValue" />
                             <div class="stat-desc pt-1 font-mono">
                                 <DisplayDecimal Value="balanceAmount" Unit="TITANO" />

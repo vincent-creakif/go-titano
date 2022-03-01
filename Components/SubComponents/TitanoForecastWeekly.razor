@@ -37,8 +37,10 @@
                     var lastDay = daysItems.Last();
                     var balanceAmountValue = lastDay.BalanceAmountValue;
                     var balanceAmount = lastDay.BalanceAmount;
-                    var rebaseAmount = daysItems.Sum(x => x.DailyRebaseAmounts.Sum());
-                    var earnings = daysItems.Sum(x => x.DailyRebaseAmountValues.Sum());
+                    var rebaseAmount = 0m;
+                    var earnings = 0m;
+                    /*var rebaseAmount = daysItems.Sum(x => x.DailyRebaseAmounts.Sum());
+                    var earnings = daysItems.Sum(x => x.DailyRebaseAmountValues.Sum());*/
 
                     <tr>
                         <td class="font-mono align-top" width="15%">

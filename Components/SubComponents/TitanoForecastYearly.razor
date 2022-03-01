@@ -29,14 +29,16 @@
         <tbody class="divide-y divide-gray-50 divide-opacity-10">
             @{
                 var currentYear = 0;
-                var months = Items.Months(_yearOffset);
-                for (var i = 0; i < months.Count; i++)
+                var forecastDateItems = ForecastItems();
+
+                var weekDays = Items.WeekDays(_weekOffset);
+                for (var i = 0; i < forecastDateItems.Count; i++)
                 {
-                    var month = months.ElementAt(i);
+                    var forecastDate = forecastDateItems.ElementAt(i);
 
-                    var yearHasChanged = 0 < currentYear && month.Date.Year != currentYear;
+                    //var yearHasChanged = 0 < currentYear && forecastDate.Date.Year != currentYear;
 
-                    var daysItems = Items.Where(x => x.Day.Year == month.Year && x.Day.Month == month.Month);
+                    var daysItems = Items.Where(x => x.Day.Year == forecastDate.Year && x.Day.Month == forecastDate.Month);
 
                     var lastDay = daysItems.Last();
                     var balanceAmountValue = lastDay.BalanceAmountValue;
@@ -47,7 +49,7 @@
                     <tr>
                         <td class="font-mono align-top" width="15%">
                             <div class="badge badge-secondary badge-outline text-xs">
-                                @($"{month.Date.Year}-{month.Date.Month:00}")
+                                @($"{forecastDate.Date.Year}-{forecastDate.Date.Month:00}")
                             </div>
                         </td>
                         <td>
@@ -64,7 +66,7 @@
                         </td>
                     </tr>
 
-                    currentYear = month.Date.Year;
+                    currentYear = forecastDate.Date.Year;
                 }
             }
         </tbody>
@@ -74,15 +76,29 @@
 @code {
     [CascadingParameter(Name="Items")]
     public IReadOnlyCollection<TitanoForecastItem> Items { get; set; }
+    [CascadingParameter(Name="View")]
+    public ForecastViewEnum View { get; set; }
 
     private int _yearOffset;
+    private int _weekOffset;
 
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
             _yearOffset = 0;
+            _weekOffset = 0;
         }
+    }
+
+    private IReadOnlyCollection<DateTime> ForecastItems()
+    {
+        return View switch
+        {
+            ForecastViewEnum.Yearly => Items.Months(_yearOffset),
+            ForecastViewEnum.Weekly => Items.WeekDays(_weekOffset),
+            _ => null
+        };
     }
 
     private void PreviousYear()

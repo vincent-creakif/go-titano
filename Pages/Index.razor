@@ -50,7 +50,9 @@
     <div class="pt-9">
         <Display If="_titanoPrice is not null && _titanoBalances is not null">
             <CascadingValue Name="Items" Value="_titanoForecastItems">
-                <TitanoForecast View="_forecastView" />
+                <CascadingValue Name="View" Value="_forecastView">
+                    <TitanoForecast />
+                </CascadingValue>
             </CascadingValue>
         </Display>
     </div>

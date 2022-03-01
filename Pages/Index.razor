@@ -69,7 +69,7 @@
         await ConnectWalletAsync();
     }
 
-    private async Task GetWeeklyForecastAsync()
+    private async Task GetForecastAsync()
     {
         _titanoForecastItems = await TitanoService.GetForecastItems(
             _titanoPrice.UsdValue,
@@ -115,7 +115,7 @@
 
         if (_titanoPrice?.HasChanged(currentPriceInUsd) == true && _titanoBalances is not null)
         {
-            await GetWeeklyForecastAsync();
+            await GetForecastAsync();
             RefreshState(false);
         }
     }
@@ -130,7 +130,7 @@
 
         if (_titanoBalances.HasChanged(currentBalanceAmount))
         {
-            await GetWeeklyForecastAsync();
+            await GetForecastAsync();
             RefreshState(false);
         }
     }

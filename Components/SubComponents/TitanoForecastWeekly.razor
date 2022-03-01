@@ -27,12 +27,16 @@
         </thead>
         <tbody class="divide-y divide-gray-50 divide-opacity-10">
             @{
-                foreach (var day in Items.WeekDays(_weekOffset))
+                var weekDays = Items.WeekDays(_weekOffset);
+                for (var i = 0; i < weekDays.Count; i++)
                 {
+                    var day = weekDays.ElementAt(i);
+
                     var daysItems = Items.Where(x => x.Day.Date == day.Date);
 
-                    var balanceAmountValue = daysItems.Last().BalanceAmountValue;
-                    var balanceAmount = daysItems.Last().BalanceAmount;
+                    var lastDay = daysItems.Last();
+                    var balanceAmountValue = lastDay.BalanceAmountValue;
+                    var balanceAmount = lastDay.BalanceAmount;
                     var rebaseAmount = daysItems.Sum(x => x.DailyRebaseAmounts.Sum());
                     var earnings = daysItems.Sum(x => x.DailyRebaseAmountValues.Sum());
 

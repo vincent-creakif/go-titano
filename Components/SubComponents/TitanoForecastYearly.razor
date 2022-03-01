@@ -29,14 +29,18 @@
         <tbody class="divide-y divide-gray-50 divide-opacity-10">
             @{
                 var currentYear = 0;
-                foreach (var month in Items.Months(_yearOffset))
+                var months = Items.Months(_yearOffset);
+                for (var i = 0; i < months.Count; i++)
                 {
+                    var month = months.ElementAt(i);
+
                     var yearHasChanged = 0 < currentYear && month.Date.Year != currentYear;
 
                     var daysItems = Items.Where(x => x.Day.Year == month.Year && x.Day.Month == month.Month);
 
-                    var balanceAmountValue = daysItems.Last().BalanceAmountValue;
-                    var balanceAmount = daysItems.Last().BalanceAmount;
+                    var lastDay = daysItems.Last();
+                    var balanceAmountValue = lastDay.BalanceAmountValue;
+                    var balanceAmount = lastDay.BalanceAmount;
                     var rebaseAmount = daysItems.Sum(x => x.DailyRebaseAmounts.Sum());
                     var earnings = daysItems.Sum(x => x.DailyRebaseAmountValues.Sum());
 

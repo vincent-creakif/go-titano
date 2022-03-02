@@ -1,18 +1,21 @@
 ﻿<div class="overflow-x-auto">
     <div class="flex flex-wrap pb-5 overflow-hidden">
-        <div class="w-2/12">
+        <div class="w-4/12">
             <button class="btn btn-sm btn-outline" @onclick="PreviousPage" disabled=@IsPreviousPageDisabled()>
                 previous
             </button>
             <button class="btn btn-sm btn-outline" @onclick="NextPage" disabled=@IsNextPageDisabled()>
                 next
             </button>
-            <span class="pl-3 font-mono text-sm opacity-70">
-                @CurrentPage() /  @_pageCount
+            <span class="pl-3 font-mono text-sm">
+                @CurrentPage()
+                <span class="opacity-70">
+                    /  @_pageCount
+                </span>
             </span>
         </div>
 
-        <div class="w-10/12">
+        <div class="w-8/12">
             <div class="btn-group opacity-90 flex justify-end">
                 @foreach (var forecastView in Enum.GetNames<ForecastViewEnum>())
                 {
@@ -29,12 +32,12 @@
         <thead class="border-b border-gray-50 border-opacity-30">
             <tr class="align-top">
                 <th class="align-top pl-4">
-                    @ColumnCaption()
+                    @DateColumnCaption()
                 </th>
                 <th>
                     Your Balance
                     <div class="opacity-70 text-xs lowercase font-mono font-normal">
-                        (end of the month)
+                         @BalanceColumnCaption()
                     </div>
                 </th>
                 <th>
@@ -71,9 +74,16 @@
                         <td class="font-mono align-top pl-4" width="15%">
                             @* Yearly *@
                             <Display If="_forecastView == ForecastViewEnum.Yearly">
-                                <span class="text-xs @(isCurrentMonth && isFirst ? "text-accent" : "")">
-                                    @($"{forecastDate.Date.Year}-{forecastDate.Date.Month:00}")
-                                </span>
+                                <Display If="_yearOffset == 0">
+                                    <span class="text-xs @(isCurrentMonth && isFirst ? "text-accent" : "")">
+                                        <DisplayDate Value="day" StringFormat="MMMM" />
+                                    </span>
+                                </Display>
+                                <Display If="_yearOffset > 0">
+                                    <span class="text-xs">
+                                        @($"{forecastDate.Date.Year}-{forecastDate.Date.Month:00}")
+                                    </span>
+                                </Display>
                             </Display>
 
                             @* Weekly *@
@@ -161,12 +171,22 @@
         };
     }
 
-    private string ColumnCaption()
+    private string DateColumnCaption()
     {
         return _forecastView switch
         {
             ForecastViewEnum.Yearly => "Month",
             ForecastViewEnum.Weekly => "Day",
+            _ => null
+        };
+    }
+
+    private string BalanceColumnCaption()
+    {
+        return _forecastView switch
+        {
+            ForecastViewEnum.Yearly => "(end of the month)",
+            ForecastViewEnum.Weekly => "(end of the day)",
             _ => null
         };
     }

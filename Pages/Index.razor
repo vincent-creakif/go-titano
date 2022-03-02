@@ -109,14 +109,17 @@
     public async Task SetTitanoBalancesAsync(string balance)
     {
         var currentBalanceAmount = _titanoBalances?.BalanceAmount ?? 0;
-        _titanoBalances = TitanoService.GetBalances(
-            balance,
-            _titanoPrice.UsdValue);
-
-        if (_titanoBalances.HasChanged(currentBalanceAmount))
+        if (_titanoPrice is not null)
         {
-            await GetForecastAsync();
-            RefreshState(false);
+            _titanoBalances = TitanoService.GetBalances(
+                balance,
+                _titanoPrice.UsdValue);
+
+            if (_titanoBalances.HasChanged(currentBalanceAmount))
+            {
+                await GetForecastAsync();
+                RefreshState(false);
+            }
         }
     }
 

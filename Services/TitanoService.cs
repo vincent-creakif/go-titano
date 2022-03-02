@@ -49,11 +49,13 @@ public class TitanoService
     public async Task<IReadOnlyCollection<TitanoForecastItem>> GetForecastItems(decimal price, decimal balanceAmount)
     {
         var localDatetime = await _timeZoneService.GetLocalDateTime(RebaseTime);
-        var startTime = localDatetime;
 
         var weekOffset = 0;
 
-        var totalDays = (localDatetime.AddYears(MaxForecastYears) - localDatetime).TotalDays - 1;
+        var targetDate = localDatetime.AddYears(MaxForecastYears);
+        targetDate = new DateTime(targetDate.Year, targetDate.Month, DateTime.DaysInMonth(targetDate.Year, targetDate.Month)).Date;
+
+        var totalDays = (targetDate - localDatetime).TotalDays - 1;
 
         var remainingTime = TimeSpan.FromHours(24) - localDatetime.TimeOfDay;
         var remainingRebases = remainingTime.Hours * _rebaseFrequencyPerHour;
@@ -62,8 +64,6 @@ public class TitanoService
         TitanoForecastItem GetDailyForecast(int rebases)
         {
             var day = localDatetime;
-
-            //var weekOffset = (int)Math.Floor((localDatetime.Date - startTime.Date).TotalDays / 7);
             if (day.DayOfWeek == DayOfWeek.Monday)
             {
                 weekOffset++;

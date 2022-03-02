@@ -49,6 +49,9 @@ public class TitanoService
     public async Task<IReadOnlyCollection<TitanoForecastItem>> GetForecastItems(decimal price, decimal balanceAmount)
     {
         var localDatetime = await _timeZoneService.GetLocalDateTime(RebaseTime);
+        var startTime = localDatetime;
+
+        var weekOffset = 0;
 
         var totalDays = (localDatetime.AddYears(MaxForecastYears) - localDatetime).TotalDays - 1;
 
@@ -59,7 +62,13 @@ public class TitanoService
         TitanoForecastItem GetDailyForecast(int rebases)
         {
             var day = localDatetime;
-            var weekNumber = GetWeekOfYear(localDatetime);
+
+            //var weekOffset = (int)Math.Floor((localDatetime.Date - startTime.Date).TotalDays / 7);
+            if (day.DayOfWeek == DayOfWeek.Monday)
+            {
+                weekOffset++;
+            }
+
             var dailyRebaseAmounts = new List<decimal>();
             var dailyRebaseAmountValues = new List<decimal>();
             var balanceAmountValue = 0m;
@@ -78,7 +87,7 @@ public class TitanoService
             }
 
             return new(
-                weekNumber,
+                weekOffset,
                 day,
                 dailyRebaseAmounts,
                 dailyRebaseAmountValues,
@@ -99,10 +108,5 @@ public class TitanoService
         }
 
         return result;
-    }
-
-    private int GetWeekOfYear(DateTimeOffset dateTime)
-    {
-        return _culture.Calendar.GetWeekOfYear(dateTime.Date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
     }
 }

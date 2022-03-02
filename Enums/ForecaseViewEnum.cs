@@ -2,8 +2,8 @@
 {
     public enum ForecastViewEnum
     {
+        Yearly,
         Weekly,
-        Yearly
-        //Daily*/
+        Daily
     }
 }

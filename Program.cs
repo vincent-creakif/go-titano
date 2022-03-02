@@ -11,6 +11,14 @@ builder.Services.AddScoped<TimeZoneService>();
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    var culture = new CultureInfo("en-US");
+    CultureInfo.CurrentCulture = culture;
+
+    await next();
+});
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

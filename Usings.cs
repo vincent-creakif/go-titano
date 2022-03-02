@@ -1,9 +1,9 @@
 ﻿global using System;
 global using System.Collections.Specialized;
 global using System.Globalization;
+global using System.Linq;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
-global using System.Text.RegularExpressions;
 global using System.Web;
 
 global using Creakif.GoTitano.Constants;

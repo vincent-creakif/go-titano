@@ -1,7 +1,7 @@
 namespace Creakif.GoTitano.Models;
 
 public record TitanoForecastItem(
-    int WeekNumber,
+    int WeekOffset,
     DateTimeOffset Day,
     IEnumerable<decimal> DailyRebaseAmounts,
     IEnumerable<decimal> DailyRebaseAmountValues,
@@ -10,38 +10,32 @@ public record TitanoForecastItem(
 
 public static class TitanoForecastItemsExtensions
 {
-    public static IReadOnlyCollection<DateTime> Months(this IReadOnlyCollection<TitanoForecastItem> ForecastItems, int offset)
+    public static IReadOnlyCollection<DateTime> Months(this IReadOnlyCollection<TitanoForecastItem> forecastItems, int offset)
     {
-        var firstYear = ForecastItems.First().Day.Year;
+        var firstYear = forecastItems.First().Day.Year;
         var currentYear = firstYear + offset;
 
-        return ForecastItems
+        return forecastItems
             .Where(x => x.Day.Year == currentYear)
             .Select(x => new DateTime(x.Day.Year, x.Day.Month, 1))
             .Distinct()
             .ToList();
     }
 
-    public static IReadOnlyCollection<DateTime> WeekDays(this IReadOnlyCollection<TitanoForecastItem> ForecastItems, int offset)
+    public static int YearlyPageCount(this IReadOnlyCollection<TitanoForecastItem> forecastItems)
     {
-        var firstWeekNumber = ForecastItems.First().WeekNumber;
-        var currentYear = ForecastItems.First().Day.Year;
-        var currentWeekNumber = firstWeekNumber + offset;
-       
-        if (currentWeekNumber > 52)
-        {
-            // 53 -> 
-            // currentWeekNumber - 52 = 1
-            // 110
-            // currentWeekNumber - 52 = 58
+        return forecastItems.Select(x => x.Day.Year).Distinct().Count();
+    }
 
-            var test = (currentWeekNumber - 52) % 52;
-            currentYear += ((currentWeekNumber - currentWeekNumber % 52) / 52);
-            currentWeekNumber = 1;
-        }
+    public static int WeeklyPageCount(this IReadOnlyCollection<TitanoForecastItem> forecastItems)
+    {
+        return (int)Math.Ceiling((forecastItems.Last().Day - forecastItems.First().Day).TotalDays / 7);
+    }
 
-        return ForecastItems
-            .Where(x => x.Day.Year == currentYear && x.WeekNumber == firstWeekNumber + offset)
+    public static IReadOnlyCollection<DateTime> WeekDays(this IReadOnlyCollection<TitanoForecastItem> forecastItems, int offset)
+    {
+        return forecastItems
+            .Where(x => x.WeekOffset == offset)
             .Select(x => x.Day.Date)
             .ToList();
     }

@@ -28,8 +28,8 @@
     <table class="table table-compact w-full overflow-y-scroll">
         <thead class="border-b border-gray-50 border-opacity-30">
             <tr class="align-top">
-                <th class="align-top">
-                    Month
+                <th class="align-top pl-4">
+                    @ColumnCaption()
                 </th>
                 <th>
                     Your Balance
@@ -55,10 +55,9 @@
                     var day = forecastItems.ElementAt(i);
 
                     var isFirst = i == 0;
-                    var isLast = i == forecastItems.Count - 1;
-
                     var isToday = i + _weekOffset == 0;
                     var isTomorrow = i + _weekOffset == 1;
+                    var isFirstDayOfMonth = day.Day == 1;
 
                     var isCurrentMonth = i + _yearOffset == 0;
 
@@ -69,48 +68,36 @@
                     var earnings = daysItems.Sum(x => x.DailyRebaseAmountValues.Sum());
 
                     <tr>
-                        <td class="font-mono align-top" width="15%">
-                            @* Daily *@
-                            <Display If="_forecastView == ForecastViewEnum.Weekly">
-                                <Display If="_weekOffset == 0">
-                                    <span class="text-secondary text-xs">
-                                        <Display If="isToday">
-                                            <span class="badge badge-accent badge-outline text-xs">
-                                                Today
-                                            </span>
-                                        </Display>
-                                        <Display If="isTomorrow">
-                                            Tomorrow
-                                        </Display>
-                                        <Display If="!isToday && !isTomorrow">
-                                            <DisplayDate Value="day" StringFormat="dddd" />
-                                        </Display>
-                                    </span>
-                                </Display>
-                                <Display If="_weekOffset > 0">
-                                    <Display If="isFirst || isLast">
-                                        <span class="badge badge-secondary badge-outline text-xs">
-                                            <DisplayDate Value="day" StringFormat="yyyy-MM-dd" />
-                                        </span>
-                                    </Display>
-                                    <Display If="!(isFirst || isLast)">
-                                        <span class="pl-2 text-secondary text-xs">
-                                            <DisplayDate Value="day" StringFormat="yyyy-MM-dd" />
-                                        </span>
-                                    </Display>
-                                </Display>
-                            </Display>
-
+                        <td class="font-mono align-top pl-4" width="15%">
                             @* Yearly *@
                             <Display If="_forecastView == ForecastViewEnum.Yearly">
-                                <Display If="isFirst || isLast">
-                                    <span class="badge @(isCurrentMonth ? "badge-accent" : "badge-secondary") badge-outline text-xs">
-                                        @($"{forecastDate.Date.Year}-{forecastDate.Date.Month:00}")
-                                    </span>
+                                <span class="text-xs @(isCurrentMonth && isFirst ? "text-accent" : "")">
+                                    @($"{forecastDate.Date.Year}-{forecastDate.Date.Month:00}")
+                                </span>
+                            </Display>
+
+                            @* Weekly *@
+                            <Display If="_forecastView == ForecastViewEnum.Weekly">
+                                <Display If="_weekOffset == 0">
+                                    <Display If="isToday">
+                                        <span class="text-xs text-accent">
+                                            Today
+                                        </span>
+                                    </Display>
+                                    <Display If="isTomorrow">
+                                        <span class="text-xs">
+                                            Tomorrow
+                                        </span>
+                                    </Display>
+                                    <Display If="!isToday && !isTomorrow">
+                                        <span class="text-xs">
+                                            <DisplayDate Value="day" StringFormat="dddd" />
+                                        </span>
+                                    </Display>
                                 </Display>
-                                <Display If="!(isFirst || isLast)">
-                                    <span class="pl-2 text-secondary text-xs">
-                                        @($"{forecastDate.Date.Year}-{forecastDate.Date.Month:00}")
+                                <Display If="_weekOffset > 0">
+                                    <span class="text-xs @(isFirstDayOfMonth ? "text-accent" : "")">
+                                        <DisplayDate Value="day" StringFormat="yyyy-MM-dd" />
                                     </span>
                                 </Display>
                             </Display>
@@ -170,6 +157,16 @@
         {
             ForecastViewEnum.Yearly => Items.Where(x => x.Day.Year == forecastDate.Year && x.Day.Month == forecastDate.Month),
             ForecastViewEnum.Weekly => Items.Where(x => x.Day.Date == forecastDate.Date),
+            _ => null
+        };
+    }
+
+    private string ColumnCaption()
+    {
+        return _forecastView switch
+        {
+            ForecastViewEnum.Yearly => "Month",
+            ForecastViewEnum.Weekly => "Day",
             _ => null
         };
     }

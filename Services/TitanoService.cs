@@ -9,7 +9,7 @@ public class TitanoService
     private const int _rebaseFrequencyPerDay = 24 * _rebaseFrequencyPerHour;
     private const decimal _rebaseRoi = (_dailyRoiInPercent / _rebaseFrequencyPerDay) / 100;
 
-    private const int MaxForecastYears = 1;
+    private const int MaxForecastInYears = 2;
 
     private TimeZoneService _timeZoneService;
 
@@ -52,7 +52,7 @@ public class TitanoService
 
         var weekOffset = 0;
 
-        var targetDate = localDatetime.AddYears(MaxForecastYears);
+        var targetDate = localDatetime.AddYears(MaxForecastInYears);
         targetDate = new DateTime(targetDate.Year, targetDate.Month, DateTime.DaysInMonth(targetDate.Year, targetDate.Month)).Date;
 
         var totalDays = (targetDate - localDatetime).TotalDays - 1;

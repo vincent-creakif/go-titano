@@ -134,11 +134,6 @@
             _rebaseCountdownSeconds--;
         }
 
-        if (_rebaseCountdownMinutes == 29 && _rebaseCountdownSeconds == 50)
-        {
-            await JsRuntime.InvokeVoidAsync("getTitanoStatsAsync");
-        }
-
         StateHasChanged();
     }
 

@@ -40,6 +40,10 @@ body {
     background-color: transparent;
 }
 
+.stat.first {
+    border-top: 0;
+}
+
 .stat-desc {
     font-size: .7rem;
 }
@@ -54,4 +58,9 @@ body {
 .initial-balance em {
     font-style: normal;
     opacity: .7;
+}
+
+.forecast-topbar {
+    padding-bottom: 1.8rem;
+    padding-top: 0.4rem;
 }

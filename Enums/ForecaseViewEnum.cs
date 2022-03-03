@@ -3,7 +3,6 @@
     public enum ForecastViewEnum
     {
         Yearly,
-        Weekly,
-        Daily
+        Weekly
     }
 }

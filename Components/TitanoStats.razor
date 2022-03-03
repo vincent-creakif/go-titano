@@ -8,7 +8,7 @@
         </svg>
     </div>
 
-    <div class="stat">
+    <div class="stat first">
         <div class="stat-title opacity-80">Your balance</div>
         <Display If="Balances is null">
             <span class="btn btn-ghost loading btn-md btn-circle"></span>
@@ -64,7 +64,7 @@
                 <span class="text-accent">$</span>@Price.UsdValueFormatted
             </div>
             <div class="stat-desc pt-1 font-mono">
-                <DisplayDate Value="Price.LastUpdatedAt" />
+                <DisplayDate Value="Price.LastUpdatedAt.ToLocalTime()" />
             </div>
         </Display>
     </div>

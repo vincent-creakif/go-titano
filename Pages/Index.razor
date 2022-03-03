@@ -7,7 +7,7 @@
 
 <PageTitle>Go Titano!</PageTitle>
 
-<div class="w-2/12 p-3 pt-0 flex flex-col">
+<div class="w-3/12 p-3 pt-0 flex flex-col">
     <TitanoStats Price="_titanoPrice"
                  InitialBalance="_initialBalance"
                  Balances="_titanoBalances"
@@ -15,11 +15,12 @@
                  @ref="_titanoStats" />
 </div>
 
-<div class="w-10/12 p-4">
+<div class="w-9/12 p-4">
     <div class="columns-1">
         <div class="text-right">
             <Display If="_connectedWallet is null">
-                <button class="btn btn-sm btn-neutral" @onclick="async() => await ConnectWalletAsync()">
+                <button class="btn btn-sm btn-warning gap-2" @onclick="async() => await ConnectWalletAsync()">
+                    <img src="public/img/metamask.svg" width="32" />
                     Connect Wallet
                 </button>
             </Display>

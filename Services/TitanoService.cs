@@ -2,8 +2,6 @@ namespace Creakif.GoTitano.Services;
 
 public class TitanoService
 {
-    private TimeZoneService _timeZoneService;
-
     private readonly CultureInfo _culture = CultureInfo.CreateSpecificCulture("en-US");
 
     private const decimal _dailyRoiInPercent = 1.89984m;
@@ -12,6 +10,8 @@ public class TitanoService
     private const decimal _rebaseRoi = (_dailyRoiInPercent / _rebaseFrequencyPerDay) / 100;
 
     private const int MaxForecastYears = 1;
+
+    private TimeZoneService _timeZoneService;
 
     public static DateTime RebaseTime => DateTime.UtcNow.AddMinutes(5);
 

@@ -64,7 +64,7 @@
                 <span class="text-accent">$</span>@Price.UsdValueFormatted
             </div>
             <div class="stat-desc pt-1 font-mono">
-                <DisplayDate Value="Price.LastUpdatedAt.ToLocalTime()" />
+                <DisplayDate Value="Price.LastUpdatedAtLocalTime" />
             </div>
         </Display>
     </div>
@@ -117,7 +117,7 @@
     public TitanoBalancesModel Balances { get; set; }
     [Parameter]
     public TitanoEarningsModel Earnings { get; set; }
-
+    
     private int? _rebaseCountdownMinutes;
     private int? _rebaseCountdownSeconds;
 

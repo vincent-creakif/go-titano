@@ -23,5 +23,8 @@ public class CoinGeckoSimplePriceItemModel
     [JsonIgnore]
     public DateTime LastUpdatedAt => LastUpdatedAtTimestamp.UnixTimeStampToLocalDateTime();
 
+    [JsonIgnore]
+    public DateTimeOffset LastUpdatedAtLocalTime { get; set; }  
+    
     public bool HasChanged(decimal currentPriceInUsd) => UsdValue != currentPriceInUsd;
 }

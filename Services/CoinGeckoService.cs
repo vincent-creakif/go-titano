@@ -6,7 +6,14 @@ public class CoinGeckoService
 
     private readonly Uri _apiBaseUri = new("https://api.coingecko.com/api/v3");
     private readonly CultureInfo _culture = CultureInfo.CreateSpecificCulture("en-US");
+    
+    private TimeZoneService _timeZoneService;
 
+    public CoinGeckoService(TimeZoneService timeZoneService)
+    {
+        _timeZoneService = timeZoneService;
+    }    
+    
     public async Task<CoinGeckoSimplePriceItemModel> GetTitanoPriceAsync(CancellationToken ct)
     {
         var result = await GetSimplePriceAsync(new[] { Coins.Titano }, ct);
@@ -36,6 +43,7 @@ public class CoinGeckoService
                 resultItem.CoinId = coinId;
                 resultItem.EurValueFormatted = resultItem.EurValue.ToString("N4", _culture);
                 resultItem.UsdValueFormatted = resultItem.UsdValue.ToString("N4", _culture);
+                resultItem.LastUpdatedAtLocalTime = await _timeZoneService.GetLocalDateTime(resultItem.LastUpdatedAt);
 
                 results.Add(resultItem);
             }

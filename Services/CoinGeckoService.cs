@@ -41,8 +41,6 @@ public class CoinGeckoService
             {
                 var resultItem = priceItems[coinId];
                 resultItem.CoinId = coinId;
-                resultItem.EurValueFormatted = resultItem.EurValue.ToString("N4", _culture);
-                resultItem.UsdValueFormatted = resultItem.UsdValue.ToString("N4", _culture);
                 resultItem.LastUpdatedAtLocalTime = await _timeZoneService.GetLocalDateTime(resultItem.LastUpdatedAt);
 
                 results.Add(resultItem);

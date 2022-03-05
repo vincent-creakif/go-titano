@@ -4,12 +4,12 @@ public class TitanoService
 {
     private readonly CultureInfo _culture = CultureInfo.CreateSpecificCulture("en-US");
 
-    private const decimal _dailyRoiInPercent = 1.89984m;
-    private const int _rebaseFrequencyPerHour = 2;
-    private const int _rebaseFrequencyPerDay = 24 * _rebaseFrequencyPerHour;
-    private const decimal _rebaseRoi = (_dailyRoiInPercent / _rebaseFrequencyPerDay) / 100;
+    private const decimal DailyRoiInPercent = 1.89984m;
+    private const int RebaseFrequencyPerHour = 2;
+    private const int RebaseFrequencyPerDay = 24 * RebaseFrequencyPerHour;
+    private const decimal RebaseRoi = (DailyRoiInPercent / RebaseFrequencyPerDay) / 100;
 
-    private const int MaxForecastInYears = 2;
+    private const int MaxForecastDurationInYears = 2;
 
     private TimeZoneService _timeZoneService;
 
@@ -33,11 +33,11 @@ public class TitanoService
 
     public TitanoEarningsModel GetEarnings(decimal price, decimal balance)
     {
-        var rebaseAmount = balance * _rebaseRoi;
+        var rebaseAmount = balance * RebaseRoi;
         var rebaseAmountValue = rebaseAmount * price;
 
-        var dailyRebaseAmount = rebaseAmount * _rebaseFrequencyPerDay;
-        var dailyRebaseAmountValue = rebaseAmountValue * _rebaseFrequencyPerDay;
+        var dailyRebaseAmount = rebaseAmount * RebaseFrequencyPerDay;
+        var dailyRebaseAmountValue = rebaseAmountValue * RebaseFrequencyPerDay;
 
         return new(
             rebaseAmount,
@@ -52,13 +52,13 @@ public class TitanoService
 
         var weekOffset = 0;
 
-        var targetDate = localDatetime.AddYears(MaxForecastInYears);
+        var targetDate = localDatetime.AddYears(MaxForecastDurationInYears);
         targetDate = new DateTime(targetDate.Year, targetDate.Month, DateTime.DaysInMonth(targetDate.Year, targetDate.Month)).Date;
 
         var totalDays = (targetDate - localDatetime).TotalDays - 1;
 
         var remainingTime = TimeSpan.FromHours(24) - localDatetime.TimeOfDay;
-        var remainingRebases = remainingTime.Hours * _rebaseFrequencyPerHour;
+        var remainingRebases = remainingTime.Hours * RebaseFrequencyPerHour;
         remainingRebases += ((remainingTime.Minutes - remainingTime.Minutes % 30) / 30) + 1;
 
         TitanoForecastItem GetDailyForecast(int rebases)
@@ -74,7 +74,7 @@ public class TitanoService
             var balanceAmountValue = 0m;
             for (var i = 0; i < rebases; i++)
             {
-                var rebaseAmount = balanceAmount * _rebaseRoi;
+                var rebaseAmount = balanceAmount * RebaseRoi;
                 var rebaseAmountValue = rebaseAmount * price;
 
                 balanceAmount += rebaseAmount;
@@ -104,7 +104,7 @@ public class TitanoService
         // Processing all future days on a year basis
         for (var i = 0; i < totalDays; i++)
         {
-            result.Add(GetDailyForecast(_rebaseFrequencyPerDay));
+            result.Add(GetDailyForecast(RebaseFrequencyPerDay));
         }
 
         return result;

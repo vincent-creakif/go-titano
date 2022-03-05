@@ -61,7 +61,7 @@
         </Display>
         <Display If="Price is not null">
             <div class="stat-value">
-                <span class="text-accent">$</span>@Price.UsdValueFormatted
+                <span class="text-accent">$</span><DisplayDecimal Value="@Price.UsdValue" Unit="TITANO" />
             </div>
             <div class="stat-desc pt-1 font-mono">
                 <DisplayDate Value="Price.LastUpdatedAtLocalTime" />

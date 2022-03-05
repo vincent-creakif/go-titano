@@ -15,12 +15,6 @@ public class CoinGeckoSimplePriceItemModel
     public string CoinId { get; set; }
 
     [JsonIgnore]
-    public string EurValueFormatted { get; set; }
-
-    [JsonIgnore]
-    public string UsdValueFormatted { get; set; }
-
-    [JsonIgnore]
     public DateTime LastUpdatedAt => LastUpdatedAtTimestamp.UnixTimeStampToLocalDateTime();
 
     [JsonIgnore]

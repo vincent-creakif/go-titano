@@ -120,13 +120,13 @@
                         </Display>
                     </td>
                     <td width="25%">
-                        <span class="text-accent">$</span><DisplayDecimal Value="balanceAmountValue"/>
+                        <span class="text-accent">@CurrencySymbol</span><DisplayDecimal Value="balanceAmountValue"/>
                         <div class="stat-desc pt-1 font-mono">
                             <DisplayDecimal Value="balanceAmount" Unit="TITANO"/>
                         </div>
                     </td>
                     <td>
-                        <span class="text-accent">$</span><DisplayDecimal Value="earnings"/>
+                        <span class="text-accent">@CurrencySymbol</span><DisplayDecimal Value="earnings"/>
                         <div class="stat-desc pt-1 font-mono">
                             <DisplayDecimal Value="rebaseAmount" Unit="TITANO"/>
                         </div>
@@ -142,6 +142,9 @@
     [CascadingParameter(Name = "Items")]
     public IReadOnlyCollection<TitanoForecastItem> Items { get; set; }
 
+    [Parameter]
+    public string CurrencySymbol { get; set; }    
+    
     private ForecastViewEnum _forecastView;
     private int _pageCount;
     private int _yearOffset;
@@ -213,9 +216,8 @@
         return _forecastView switch
         {
             ForecastViewEnum.Yearly => _yearOffset + 1,
-            ForecastViewEnum.Weekly => _weekOffset + 1,
-            _ => 0
-            };
+            ForecastViewEnum.Weekly => _weekOffset + 1
+        };
     }
 
     private void PreviousPage()

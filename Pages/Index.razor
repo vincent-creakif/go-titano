@@ -8,11 +8,14 @@
 <PageTitle>Go Titano!</PageTitle>
 
 <div class="w-3/12 p-3 pt-0 flex flex-col">
-    <TitanoStats Price="_titanoPrice"
-                 InitialBalance="_initialBalance"
-                 Balances="_titanoBalances"
-                 Earnings="_titanoEarnings"
-                 @ref="_titanoStats" />
+    <Display If="_currency is not null">
+        <TitanoStats Price="_titanoPrice"
+                     Currency="@_currency"
+                     InitialBalance="_initialBalance"
+                     Balances="_titanoBalances"
+                     Earnings="_titanoEarnings"
+                     @ref="_titanoStats"/>
+    </Display>
 </div>
 
 <div class="w-9/12 p-4">
@@ -35,7 +38,7 @@
     <div class="pt-6">
         <Display If="_titanoPrice is not null && _titanoBalances is not null">
             <CascadingValue Name="Items" Value="_titanoForecastItems">
-                <TitanoForecast />
+                <TitanoForecast CurrencySymbol="@Currencies.Symbols[_currency]" />
             </CascadingValue>
         </Display>
     </div>
@@ -49,6 +52,7 @@
     private BscScanResultItemModel _initialBalance;
     private IReadOnlyCollection<TitanoForecastItem> _titanoForecastItems;    
     private string _connectedWallet;
+    private string _currency = Currencies.Usd;
 
     protected override async Task OnAfterFirstRenderAndParametersSetAsync()
     {
@@ -58,7 +62,7 @@
     private async Task GetForecastAsync()
     {
         _titanoForecastItems = await TitanoService.GetForecastItems(
-            _titanoPrice.UsdValue,
+            _titanoPrice.In(_currency),
             _titanoBalances.BalanceAmount);
     }
 
@@ -96,10 +100,10 @@
     [JSInvokable]
     public async Task GetTitanoPriceAsync()
     {
-        var currentPriceInUsd = _titanoPrice?.UsdValue ?? 0m;
+        var currentPrice = _titanoPrice?.In(_currency) ?? 0m;
         _titanoPrice = await CoinGeckoService.GetTitanoPriceAsync(ct);
 
-        if (_titanoPrice?.HasChanged(currentPriceInUsd) == true && _titanoBalances is not null)
+        if (_titanoPrice?.HasChanged(currentPrice, _currency) == true && _titanoBalances is not null)
         {
             await GetForecastAsync();
             RefreshState(false);
@@ -114,7 +118,7 @@
         {
             _titanoBalances = TitanoService.GetBalances(
                 balance,
-                _titanoPrice.UsdValue);
+                _titanoPrice.In(_currency));
 
             if (_titanoBalances.HasChanged(currentBalanceAmount))
             {
@@ -128,7 +132,7 @@
     public void GetTitanoEarningsAsync()
     {
         _titanoEarnings = TitanoService.GetEarnings(
-            _titanoPrice.UsdValue,
+            _titanoPrice.In(_currency),
             _titanoBalances.BalanceAmount);
 
         RefreshState(false);

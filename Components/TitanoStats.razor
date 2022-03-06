@@ -17,7 +17,7 @@
             <div class="stat-value">
                 <div class="dropdown dropdown-hover initial-balance">
                     <label tabindex="0">
-                        <span class="text-accent">$</span><DisplayDecimal Value="Balances.BalanceAmountValue" />
+                        <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="Balances.BalanceAmountValue" />
                     </label>
                     <ul tabindex="0" class="mt-1 p-2 dropdown-content bg-base-300 w-auto font-normal text-xs">
                         <Display If="InitialBalance is null">
@@ -38,7 +38,7 @@
                             </li>
                             <li>
                                 <em>Increased value:</em>
-                                <span class="text-accent">$</span><DisplayDecimal Value="@BalanceAmountValueIncrease(InitialBalance.Value, Balances.BalanceAmount)" />
+                                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="@BalanceAmountValueIncrease(InitialBalance.Value, Balances.BalanceAmount)" />
                             </li>
                             <li>
                                 <em>Increased amount:</em>
@@ -61,7 +61,7 @@
         </Display>
         <Display If="Price is not null">
             <div class="stat-value">
-                <span class="text-accent">$</span><DisplayDecimal Value="@Price.UsdValue" StringFormat="N4" />
+                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="@Price.In(Currency)" StringFormat="N4" />
             </div>
             <div class="stat-desc pt-1 font-mono">
                 <DisplayDate Value="Price.LastUpdatedAtLocalTime" />
@@ -76,7 +76,7 @@
         </Display>
         <Display If="Earnings is not null">
             <div class="stat-value">
-                <span class="text-accent">$</span><DisplayDecimal Value="@Earnings.RebaseAmountValue" />
+                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="@Earnings.RebaseAmountValue" />
             </div>
             <div class="stat-desc pt-1 font-mono">
                 <DisplayDecimal Value="@Earnings.RebaseAmount" Unit="TITANO" />
@@ -99,7 +99,7 @@
         </Display>
         <Display If="Earnings is not null">
             <div class="stat-value">
-                <span class="text-accent">$</span><DisplayDecimal Value="@Earnings.DailyRebaseAmountValue" />
+                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="@Earnings.DailyRebaseAmountValue" />
             </div>
             <div class="stat-desc pt-1 font-mono">
                 <DisplayDecimal Value="@Earnings.DailyRebaseAmount" Unit="TITANO" />
@@ -117,9 +117,18 @@
     public TitanoBalancesModel Balances { get; set; }
     [Parameter]
     public TitanoEarningsModel Earnings { get; set; }
+    [Parameter]
+    public string Currency { get; set; }
+
+    private string _currencySymbol;
     
     private int? _rebaseCountdownMinutes;
     private int? _rebaseCountdownSeconds;
+    
+    protected override void OnParametersSet()
+    {
+        _currencySymbol = Currencies.Symbols[Currency];
+    }    
 
     [JSInvokable]
     public async Task SetRebaseCountdownAsync()
@@ -144,6 +153,6 @@
 
     private decimal BalanceAmountValueIncrease(decimal initialBalance, decimal balanceAmount)
     {
-        return BalanceAmountIncrease(initialBalance, balanceAmount) * Price.UsdValue;
+        return BalanceAmountIncrease(initialBalance, balanceAmount) * Price.In(Currency);
     }
 }

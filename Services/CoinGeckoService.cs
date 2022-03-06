@@ -26,7 +26,7 @@ public class CoinGeckoService
         var uri = _apiBaseUri
             .Append("simple", "price")
             .AppendParameter("ids", string.Join(",", coinIds))
-            .AppendParameter("vs_currencies", "eur,usd")
+            .AppendParameter("vs_currencies", string.Join(",", CurrenciesGroups.CurrenciesAvailable))
             .AppendParameter("include_last_updated_at", "true");
 
         try

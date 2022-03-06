@@ -22,7 +22,7 @@ public class TitanoService
 
     public TitanoBalancesModel GetBalances(string balance, decimal price)
     {
-        if (decimal.TryParse(balance, NumberStyles.AllowDecimalPoint, _culture, out decimal balanceAmount))
+        if (decimal.TryParse(balance, NumberStyles.AllowDecimalPoint, _culture, out var balanceAmount))
         {
             return new(
                 balanceAmount,

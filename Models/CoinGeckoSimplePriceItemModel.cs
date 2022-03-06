@@ -1,12 +1,11 @@
+using System.Reflection;
+
 namespace Creakif.GoTitano.Models;
 
 public class CoinGeckoSimplePriceItemModel
 {
-    [JsonPropertyName("eur")]
-    public decimal EurValue { get; set; }
-
-    [JsonPropertyName("usd")]
-    public decimal UsdValue { get; set; }
+    public decimal Eur { get; set; }
+    public decimal Usd { get; set; }
 
     [JsonPropertyName("last_updated_at")]
     public long LastUpdatedAtTimestamp { get; set; }
@@ -18,7 +17,13 @@ public class CoinGeckoSimplePriceItemModel
     public DateTime LastUpdatedAt => LastUpdatedAtTimestamp.UnixTimeStampToLocalDateTime();
 
     [JsonIgnore]
-    public DateTimeOffset LastUpdatedAtLocalTime { get; set; }  
+    public DateTimeOffset LastUpdatedAtLocalTime { get; set; }
+
+    public decimal In(string currency)
+    {
+        var priceProperty = GetType().GetProperty(currency, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+        return (decimal)priceProperty.GetValue(this);
+    }
     
-    public bool HasChanged(decimal currentPriceInUsd) => UsdValue != currentPriceInUsd;
+    public bool HasChanged(decimal currentPrice, string currency) => currentPrice != In(currency);
 }

@@ -29,7 +29,8 @@ public static class TitanoForecastItemsExtensions
 
     public static int WeeklyPageCount(this IReadOnlyCollection<TitanoForecastItem> forecastItems)
     {
-        return (int)Math.Ceiling((forecastItems.Last().Day - forecastItems.First().Day).TotalDays / 7);
+        var totalDays = (forecastItems.Last().Day - forecastItems.First().Day).TotalDays;
+        return (int)((totalDays - totalDays % 7) / 7) + (totalDays % 7 > 0 ? 1 : 0);
     }
 
     public static IReadOnlyCollection<DateTime> WeekDays(this IReadOnlyCollection<TitanoForecastItem> forecastItems, int offset)

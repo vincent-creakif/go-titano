@@ -53,6 +53,7 @@ public class TitanoService
         var weekOffset = 0;
 
         var targetDate = localDatetime.AddYears(MaxForecastDurationInYears);
+        // Set target date to the last day of the current month in MaxForecastDurationInYears ahead
         targetDate = new DateTime(targetDate.Year, targetDate.Month, DateTime.DaysInMonth(targetDate.Year, targetDate.Month)).Date;
 
         var totalDays = (targetDate - localDatetime).TotalDays - 1;
@@ -61,11 +62,13 @@ public class TitanoService
         var remainingRebases = remainingTime.Hours * RebaseFrequencyPerHour;
         remainingRebases += ((remainingTime.Minutes - remainingTime.Minutes % 30) / 30) + 1;
 
+        var numberOfDays = 0;
         TitanoForecastItem GetDailyForecast(int rebases)
         {
             var day = localDatetime;
-            if (day.DayOfWeek == DayOfWeek.Monday)
+            if (numberOfDays++ == 7)
             {
+                numberOfDays = 1;
                 weekOffset++;
             }
 

@@ -35,14 +35,17 @@
                             <li>
                                 <em>Date:</em>
                                 <DisplayDate Value="InitialBalance.CreatedAt" StringFormat="yyyy-MM-dd" />
+                                <small class="opacity-40">
+                                    (<DisplayHumanizedDate Value="InitialBalance.CreatedAt" />)
+                                </small>
                             </li>
                             <li>
                                 <em>Increased value:</em>
-                                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="@BalanceAmountValueIncrease(InitialBalance.Value, Balances.BalanceAmount)" />
+                                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="BalanceAmountValueIncrease(InitialBalance.Value, Balances.BalanceAmount)" />
                             </li>
                             <li>
                                 <em>Increased amount:</em>
-                                <DisplayDecimal Value="@BalanceAmountIncrease(InitialBalance.Value, Balances.BalanceAmount)" Unit="TITANO" />
+                                <DisplayDecimal Value="BalanceAmountIncrease(InitialBalance.Value, Balances.BalanceAmount)" Unit="TITANO" />
                             </li>
                         </Display>
                     </ul>
@@ -61,7 +64,7 @@
         </Display>
         <Display If="Price is not null">
             <div class="stat-value">
-                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="@Price.In(Currency)" StringFormat="N4" />
+                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="Price.In(Currency)" StringFormat="N4" />
             </div>
             <div class="stat-desc pt-1 font-mono">
                 <DisplayDate Value="Price.LastUpdatedAtLocalTime" />
@@ -76,10 +79,10 @@
         </Display>
         <Display If="Earnings is not null">
             <div class="stat-value">
-                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="@Earnings.RebaseAmountValue" />
+                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="Earnings.RebaseAmountValue" />
             </div>
             <div class="stat-desc pt-1 font-mono">
-                <DisplayDecimal Value="@Earnings.RebaseAmount" Unit="TITANO" />
+                <DisplayDecimal Value="Earnings.RebaseAmount" Unit="TITANO" />
                 <br />
                 rebase in
                 <Display If="_rebaseCountdownMinutes is not null && _rebaseCountdownSeconds is not null">
@@ -99,13 +102,31 @@
         </Display>
         <Display If="Earnings is not null">
             <div class="stat-value">
-                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="@Earnings.DailyRebaseAmountValue" />
+                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="Earnings.DailyRebaseAmountValue" />
             </div>
             <div class="stat-desc pt-1 font-mono">
-                <DisplayDecimal Value="@Earnings.DailyRebaseAmount" Unit="TITANO" />
+                <DisplayDecimal Value="Earnings.DailyRebaseAmount" Unit="TITANO" />
             </div>
         </Display>
     </div>
+    
+    <div class="stat">
+        <div class="stat-title opacity-80">Holders</div>
+        <Display If="Holders is null">
+            <span class="btn btn-ghost loading btn-md btn-circle"></span>
+        </Display>
+        <Display If="Holders is not null">
+            <div class="stat-figure text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+            </div>            
+            <div class="stat-value text-primary">
+                <DisplayDecimal Value="Holders.TotalCount" StringFormat="N0"/>
+            </div>
+            <div class="stat-desc pt-1 font-mono">
+                <DisplayDate Value="Holders.LastUpdatedAtLocalTime"/>
+            </div>
+        </Display>
+    </div>    
 </div>
 
 @code {
@@ -117,6 +138,8 @@
     public TitanoBalancesModel Balances { get; set; }
     [Parameter]
     public TitanoEarningsModel Earnings { get; set; }
+    [Parameter]
+    public BscScanHoldersModel Holders { get; set; }    
     [Parameter]
     public string Currency { get; set; }
 

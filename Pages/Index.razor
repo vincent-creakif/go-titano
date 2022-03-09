@@ -14,6 +14,7 @@
                      InitialBalance="_initialBalance"
                      Balances="_titanoBalances"
                      Earnings="_titanoEarnings"
+                     Holders="_titanoHolders"
                      @ref="_titanoStats"/>
     </Display>
 </div>
@@ -50,6 +51,7 @@
     private TitanoBalancesModel _titanoBalances;
     private TitanoEarningsModel _titanoEarnings;
     private BscScanResultItemModel _initialBalance;
+    private BscScanHoldersModel _titanoHolders;
     private IReadOnlyCollection<TitanoForecastItem> _titanoForecastItems;    
     private string _connectedWallet;
     private string _currency = Currencies.Usd;
@@ -78,7 +80,7 @@
     }
 
     [JSInvokable]
-    public void SetConnectedWalletAsync(string wallet)
+    public async Task SetConnectedWalletAsync(string wallet)
     {
         _connectedWallet = wallet;
         RefreshState(false);
@@ -93,6 +95,7 @@
         _titanoPrice = null;
         _titanoBalances = null;
         _titanoEarnings = null;
+        _titanoHolders = null;
         _titanoForecastItems = null;
         RefreshState(false);
     }
@@ -137,6 +140,16 @@
 
         RefreshState(false);
     }
+    
+    [JSInvokable]
+    public async Task GetTitanoHoldersAsync()
+    {
+        _titanoHolders = await BscScanService.GetTotalHoldersAsync(
+            Coins.Contracts[Coins.Titano],
+            ct);
+        
+        RefreshState(false);
+    }    
 
     [JSInvokable]
     public async Task SetRebaseCountdownAsync()
@@ -150,7 +163,11 @@
     [JSInvokable]
     public async Task GetInitialBalanceAsync(string walletAddress)
     {
-        _initialBalance = await BscScanService.GetInitialBalanceAsync(walletAddress, ct);
+        _initialBalance = await BscScanService.GetInitialBalanceAsync(
+            walletAddress,
+            Coins.Contracts[Coins.Titano],
+            ct);
+        
         StateHasChanged();
     }
 }

@@ -98,7 +98,7 @@ async function getTitanoEarningsAsync() {
 }
 
 async function getTitanoHoldersAsync() {
-    //await _dotNetObjectRef.invokeMethodAsync("GetTitanoHoldersAsync")
+    await _dotNetObjectRef.invokeMethodAsync("GetTitanoHoldersAsync")
 }
 
 async function setConnectedWalletAsync(wallet) {

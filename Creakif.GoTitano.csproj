@@ -12,7 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CloudflareSolverRe" Version="1.0.6" />
+		<PackageReference Include="FlareSolverrSharp" Version="2.2.0" />
 		<PackageReference Include="Humanizer.Core" Version="2.14.1" />
 	</ItemGroup>
 

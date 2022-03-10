@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
-using CloudflareSolverRe;
-using Creakif.GoTitano.Extensions;
+using FlareSolverrSharp;
 
 namespace Creakif.GoTitano.Services;
 
@@ -10,7 +9,10 @@ public class BscScanService
 
     private const string TotalHoldersRegex = @"\$?(\d{1,3}(\,\d{3})*|(\d+))(\.\d{1,2})? addresses";
     
-    private static readonly HttpClient _httpClient = new();
+    private static readonly HttpClient _httpClient = new(new ClearanceHandler("http://localhost:8191/")
+    {
+        MaxTimeout = 60000
+    });
 
     private readonly Uri _baseUri = new("https://bscscan.com");
     private readonly Uri _apiBaseUri = new("https://api.bscscan.com/api");
@@ -59,16 +61,6 @@ public class BscScanService
 
         try
         {
-            var cf = new CloudflareSolver
-            {
-                MaxTries = 3,
-                ClearanceDelay = 3000
-            };
-
-            var handler = new HttpClientHandler();
-
-            var result = await cf.Solve(_httpClient, handler, uri);
-
             var response = await _httpClient.GetAsync(uri, ct);
             var responseContent = await response.Content.ReadAsStringAsync(ct);
 

@@ -2,7 +2,7 @@
 
 @code {
     [Parameter]
-    public DateTimeOffset Value { get; set; }
+    public DateTimeOffset? Value { get; set; }
     [Parameter]
     public string StringFormat { get; set; }
 
@@ -15,6 +15,10 @@
 
     private string GetDisplayText()
     {
-        return Value.ToString(StringFormat);
+        if (Value is null)
+        {
+            return null;
+        }
+        return Value.Value.ToString(StringFormat);
     }
 }

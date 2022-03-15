@@ -1,10 +1,16 @@
-﻿@DisplayText
+﻿@if (!string.IsNullOrWhiteSpace(CurrencySymbol))
+{
+    <span class="text-accent">@CurrencySymbol</span>
+}
+@DisplayText
 
 @code {
     [Parameter]
-    public decimal Value { get; set; }
+    public decimal? Value { get; set; }
     [Parameter]
     public string StringFormat { get; set; }
+    [Parameter]
+    public string CurrencySymbol { get; set; }
     [Parameter]
     public string Unit { get; set; }
 
@@ -17,7 +23,12 @@
 
     private string GetDisplayText()
     {
-        var displayText = Value.ToString(StringFormat, new CultureInfo("en-US"));
+        if (Value is null)
+        {
+            return null;
+        }
+
+        var displayText = Value.Value.ToString(StringFormat, new CultureInfo("en-US"));
         if (!string.IsNullOrWhiteSpace(Unit))
         {
             displayText += $" {Unit}";

@@ -1,162 +1,168 @@
-﻿<div class="overflow-x-auto">
-    <div class="forecast-topbar flex flex-wrap pb-5 overflow-hidden">
-        <div class="w-4/12 flex">
-            <div class="btn-group opacity-90 flex justify-end">
-                @foreach (var forecastView in Enum.GetNames<ForecastViewEnum>())
-                {
-                    var enumValue = Enum.Parse<ForecastViewEnum>(forecastView);
-                    <button class="btn btn-sm @(_forecastView == enumValue ? "btn-info" : "btn-outline")" @onclick="() => ForecastViewChanged(enumValue)">
-                        @forecastView
-                    </button>
-                }
+﻿<Display If="Items is not null">
+    <div class="overflow-x-auto">
+        <div class="forecast-topbar flex flex-wrap pb-5 overflow-hidden">
+            <div class="w-4/12 flex">
+                <div class="btn-group opacity-90 flex justify-end">
+                    @foreach (var forecastView in Enum.GetNames<ForecastViewEnum>())
+                    {
+                        var enumValue = Enum.Parse<ForecastViewEnum>(forecastView);
+                        <button class="btn btn-sm @(_forecastView == enumValue ? "btn-info" : "btn-outline")" @onclick="() => ForecastViewChanged(enumValue)">
+                            @forecastView
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="w-4/12 flex items-center">
+                <button class="btn btn-sm btn-outline" @onclick="PreviousPage" disabled=@IsPreviousPageDisabled()>
+                    previous
+                </button>
+                <span class="px-3 font-mono text-sm">
+                    @CurrentPage()
+                    <span class="opacity-40">
+                        / @_pageCount
+                    </span>
+                </span>              
+                <button class="btn btn-sm btn-outline" @onclick="NextPage" disabled=@IsNextPageDisabled()>
+                    next
+                </button>
+            </div>
+        
+            <div class="w-4/12 flex justify-end">
+
             </div>
         </div>
 
-        <div class="w-4/12 flex items-center">
-            <button class="btn btn-sm btn-outline" @onclick="PreviousPage" disabled=@IsPreviousPageDisabled()>
-                previous
-            </button>
-            <span class="px-3 font-mono text-sm">
-                @CurrentPage()
-                <span class="opacity-40">
-                    / @_pageCount
-                </span>
-            </span>              
-            <button class="btn btn-sm btn-outline" @onclick="NextPage" disabled=@IsNextPageDisabled()>
-                next
-            </button>
-        </div>
-        
-        <div class="w-4/12 flex justify-end">
+        <table class="table table-compact w-full overflow-y-scroll">
+            <thead class="border-b border-gray-50 border-opacity-30">
+            <tr class="align-top">
+                <th class="align-top pl-4">
+                    @DateColumnCaption()
+                </th>
+                <th>
+                    Your Balance
+                    <div class="opacity-70 text-xs lowercase font-mono font-normal">
+                        @BalanceColumnCaption()
+                    </div>
+                </th>
+                <th>
+                    Earnings
+                    <div class="opacity-70 text-xs lowercase font-mono font-normal">
+                        (upcoming)
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 divide-opacity-10">
+            @{
+                var forecastItems = ForecastItems();
+                for (var i = 0; i < forecastItems.Count; i++)
+                {
+                    var forecastDate = forecastItems.ElementAt(i);
+                    var daysItems = ForecastDateItems(forecastDate);
+                    var day = forecastItems.ElementAt(i);
 
-        </div>
-    </div>
+                    var isFirst = i == 0;
+                    var isToday = i + _weekOffset == 0;
+                    var isTomorrow = i + _weekOffset == 1;
+                    var isFirstDayOfMonth = day.Day == 1;
 
-    <table class="table table-compact w-full overflow-y-scroll">
-        <thead class="border-b border-gray-50 border-opacity-30">
-        <tr class="align-top">
-            <th class="align-top pl-4">
-                @DateColumnCaption()
-            </th>
-            <th>
-                Your Balance
-                <div class="opacity-70 text-xs lowercase font-mono font-normal">
-                    @BalanceColumnCaption()
-                </div>
-            </th>
-            <th>
-                Earnings
-                <div class="opacity-70 text-xs lowercase font-mono font-normal">
-                    (upcoming)
-                </div>
-            </th>
-        </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-50 divide-opacity-10">
-        @{
-            var forecastItems = ForecastItems();
-            for (var i = 0; i < forecastItems.Count; i++)
-            {
-                var forecastDate = forecastItems.ElementAt(i);
-                var daysItems = ForecastDateItems(forecastDate);
-                var day = forecastItems.ElementAt(i);
+                    var isCurrentMonth = i + _yearOffset == 0;
 
-                var isFirst = i == 0;
-                var isToday = i + _weekOffset == 0;
-                var isTomorrow = i + _weekOffset == 1;
-                var isFirstDayOfMonth = day.Day == 1;
+                    var lastDay = daysItems.Last();
+                    var balanceAmountValue = lastDay.BalanceAmountValue;
+                    var balanceAmount = lastDay.BalanceAmount;
+                    var rebaseAmount = daysItems.Sum(x => x.DailyRebaseAmounts.Sum());
+                    var earnings = daysItems.Sum(x => x.DailyRebaseAmountValues.Sum());
 
-                var isCurrentMonth = i + _yearOffset == 0;
-
-                var lastDay = daysItems.Last();
-                var balanceAmountValue = lastDay.BalanceAmountValue;
-                var balanceAmount = lastDay.BalanceAmount;
-                var rebaseAmount = daysItems.Sum(x => x.DailyRebaseAmounts.Sum());
-                var earnings = daysItems.Sum(x => x.DailyRebaseAmountValues.Sum());
-
-                <tr>
-                    <td class="font-mono align-top pl-4" width="15%">
-                        @* Yearly *@
-                        <Display If="_forecastView == ForecastViewEnum.Yearly">
-                            <Display If="_yearOffset == 0">
-                                <span class="text-xs @(isCurrentMonth && isFirst ? "text-accent" : "")">
-                                    <DisplayDate Value="day" StringFormat="MMMM"/>
-                                </span>
-                            </Display>
-                            <Display If="_yearOffset > 0">
-                                <span class="text-xs">
-                                    @($"{forecastDate.Date.Year}-{forecastDate.Date.Month:00}")
-                                </span>
-                            </Display>
-                        </Display>
-
-                        @* Weekly *@
-                        <Display If="_forecastView == ForecastViewEnum.Weekly">
-                            <Display If="_weekOffset == 0">
-                                <Display If="isToday">
-                                    <span class="text-xs text-accent">
-                                        Today
+                    <tr>
+                        <td class="font-mono align-top pl-4" width="15%">
+                            @* Yearly *@
+                            <Display If="_forecastView == ForecastViewEnum.Yearly">
+                                <Display If="_yearOffset == 0">
+                                    <span class="text-xs @(isCurrentMonth && isFirst ? "text-accent" : "")">
+                                        <DisplayDate Value="day" StringFormat="MMMM"/>
                                     </span>
                                 </Display>
-                                <Display If="isTomorrow">
+                                <Display If="_yearOffset > 0">
                                     <span class="text-xs">
-                                        Tomorrow
-                                    </span>
-                                </Display>
-                                <Display If="!isToday && !isTomorrow">
-                                    <span class="text-xs">
-                                        <DisplayDate Value="day" StringFormat="dddd"/>
+                                        @($"{forecastDate.Date.Year}-{forecastDate.Date.Month:00}")
                                     </span>
                                 </Display>
                             </Display>
-                            <Display If="_weekOffset > 0">
-                                <span class="text-xs @(isFirstDayOfMonth ? "text-accent" : "")">
-                                    <DisplayDate Value="day" StringFormat="yyyy-MM-dd"/>
-                                    <div class="stat-desc pt-1 font-mono">
-                                        <DisplayDate Value="day" StringFormat="dddd"/>
-                                    </div>                                    
-                                </span>
+
+                            @* Weekly *@
+                            <Display If="_forecastView == ForecastViewEnum.Weekly">
+                                <Display If="_weekOffset == 0">
+                                    <Display If="isToday">
+                                        <span class="text-xs text-accent">
+                                            Today
+                                        </span>
+                                    </Display>
+                                    <Display If="isTomorrow">
+                                        <span class="text-xs">
+                                            Tomorrow
+                                        </span>
+                                    </Display>
+                                    <Display If="!isToday && !isTomorrow">
+                                        <span class="text-xs">
+                                            <DisplayDate Value="day" StringFormat="dddd"/>
+                                        </span>
+                                    </Display>
+                                </Display>
+                                <Display If="_weekOffset > 0">
+                                    <span class="text-xs @(isFirstDayOfMonth ? "text-accent" : "")">
+                                        <DisplayDate Value="day" StringFormat="yyyy-MM-dd"/>
+                                        <div class="stat-desc pt-1 font-mono">
+                                            <DisplayDate Value="day" StringFormat="dddd"/>
+                                        </div>                                    
+                                    </span>
+                                </Display>
                             </Display>
-                        </Display>
-                    </td>
-                    <td width="25%">
-                        <span class="text-accent">@CurrencySymbol</span><DisplayDecimal Value="balanceAmountValue"/>
-                        <div class="stat-desc pt-1 font-mono">
-                            <DisplayDecimal Value="balanceAmount" Unit="TITANO"/>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="text-accent">@CurrencySymbol</span><DisplayDecimal Value="earnings"/>
-                        <div class="stat-desc pt-1 font-mono">
-                            <DisplayDecimal Value="rebaseAmount" Unit="TITANO"/>
-                        </div>
-                    </td>
-                </tr>
+                        </td>
+                        <td width="25%">
+                            <DisplayDecimal Value="balanceAmountValue" CurrencySymbol="@State.CurrencySymbol" />
+                            <div class="stat-desc pt-1 font-mono">
+                                <DisplayDecimal Value="balanceAmount" Unit="TITANO"/>
+                            </div>
+                        </td>
+                        <td>
+                            <DisplayDecimal Value="earnings" CurrencySymbol="@State.CurrencySymbol" />
+                            <div class="stat-desc pt-1 font-mono">
+                                <DisplayDecimal Value="rebaseAmount" Unit="TITANO"/>
+                            </div>
+                        </td>
+                    </tr>
+                }
             }
-        }
-        </tbody>
-    </table>
-</div>
+            </tbody>
+        </table>
+    </div>
+</Display>
 
 @code {
-    [CascadingParameter(Name = "Items")]
-    public IReadOnlyCollection<TitanoForecastItem> Items { get; set; }
+    [CascadingParameter(Name = "State")]
+    public State State { get; set; }
 
     [Parameter]
-    public string CurrencySymbol { get; set; }    
-    
+    public IReadOnlyCollection<TitanoForecastItem> Items { get; set; }
+
     private ForecastViewEnum _forecastView;
     private int _pageCount;
     private int _yearOffset;
     private int _weekOffset;
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (firstRender)
+        _yearOffset = 0;
+        _weekOffset = 0;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Items is not null)
         {
             _pageCount = Items.YearlyPageCount();
-            _yearOffset = 0;
-            _weekOffset = 0;
             StateHasChanged();
         }
     }

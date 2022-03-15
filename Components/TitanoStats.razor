@@ -10,79 +10,49 @@
 
     <div class="stat first">
         <div class="stat-title opacity-80">Your balance</div>
-        <Display If="Balances is null">
+        <Display If="State?.Balances is null">
             <span class="btn btn-ghost loading btn-md btn-circle"></span>
         </Display>
-        <Display If="Balances is not null">
+        <Display If="State?.Balances is not null">
             <div class="stat-value">
                 <div class="dropdown dropdown-hover initial-balance">
                     <label tabindex="0">
-                        <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="Balances.BalanceAmountValue" />
+                        <DisplayDecimal Value="State.Balances.BalanceAmountValue" CurrencySymbol="@State.CurrencySymbol" />
                     </label>
-                    <ul tabindex="0" class="mt-1 p-2 dropdown-content bg-base-300 w-auto font-normal text-xs">
-                        <Display If="InitialBalance is null">
-                            <span class="btn btn-ghost loading btn-sm btn-circle"></span>
-                        </Display>
-                        <Display If="InitialBalance is not null">
-                            <li>
-                                <strong>First deposit stats</strong>
-                                <span class="divider m-0"></span>
-                            </li>
-                            <li>
-                                <em>Amount:</em>
-                                <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
-                            </li>
-                            <li>
-                                <em>Date:</em>
-                                <DisplayDate Value="InitialBalance.CreatedAt" StringFormat="yyyy-MM-dd" />
-                                <small class="opacity-40">
-                                    (<DisplayHumanizedDate Value="InitialBalance.CreatedAt" />)
-                                </small>
-                            </li>
-                            <li>
-                                <em>Increased value:</em>
-                                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="BalanceAmountValueIncrease(InitialBalance.Value, Balances.BalanceAmount)" />
-                            </li>
-                            <li>
-                                <em>Increased amount:</em>
-                                <DisplayDecimal Value="BalanceAmountIncrease(InitialBalance.Value, Balances.BalanceAmount)" Unit="TITANO" />
-                            </li>
-                        </Display>
-                    </ul>
                 </div>
             </div>
             <div class="stat-desc pt-1 font-mono">
-                <DisplayDecimal Value="Balances.BalanceAmount" Unit="TITANO" />
+                <DisplayDecimal Value="State.Balances?.BalanceAmount" Unit="TITANO" />
             </div>
         </Display>
     </div>
 
     <div class="stat">
         <div class="stat-title opacity-80">TITANO price</div>
-        <Display If="Price is null">
+        <Display If="State?.Price is null">
             <span class="btn btn-ghost loading btn-md btn-circle"></span>
         </Display>
-        <Display If="Price is not null">
+        <Display If="State?.Price is not null">
             <div class="stat-value">
-                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="Price.In(Currency)" StringFormat="N4" />
+                <DisplayDecimal Value="State.Price.In(State.Currency)" StringFormat="N4" CurrencySymbol="@State.CurrencySymbol" />
             </div>
             <div class="stat-desc pt-1 font-mono">
-                <DisplayDate Value="Price.LastUpdatedAtLocalTime" />
+                <DisplayDate Value="State.Price.LastUpdatedAtLocalTime" />
             </div>
         </Display>
     </div>
 
     <div class="stat">
         <div class="stat-title opacity-80">Rebase earnings</div>
-        <Display If="Earnings is null">
+        <Display If="State?.Earnings is null">
             <span class="btn btn-ghost loading btn-md btn-circle"></span>
         </Display>
-        <Display If="Earnings is not null">
+        <Display If="State?.Earnings is not null">
             <div class="stat-value">
-                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="Earnings.RebaseAmountValue" />
+                <DisplayDecimal Value="State.Earnings.RebaseAmountValue" CurrencySymbol="@State.CurrencySymbol" />
             </div>
             <div class="stat-desc pt-1 font-mono">
-                <DisplayDecimal Value="Earnings.RebaseAmount" Unit="TITANO" />
+                <DisplayDecimal Value="State.Earnings.RebaseAmount" Unit="TITANO" />
                 <br />
                 rebase in
                 <Display If="_rebaseCountdownMinutes is not null && _rebaseCountdownSeconds is not null">
@@ -97,15 +67,15 @@
 
     <div class="stat">
         <div class="stat-title opacity-80">Daily earnings</div>
-        <Display If="Earnings is null">
+        <Display If="State?.Earnings is null">
             <span class="btn btn-ghost loading btn-md btn-circle"></span>
         </Display>
-        <Display If="Earnings is not null">
+        <Display If="State?.Earnings is not null">
             <div class="stat-value">
-                <span class="text-accent">@_currencySymbol</span><DisplayDecimal Value="Earnings.DailyRebaseAmountValue" />
+                <DisplayDecimal Value="State.Earnings.DailyRebaseAmountValue" CurrencySymbol="@State.CurrencySymbol" />
             </div>
             <div class="stat-desc pt-1 font-mono">
-                <DisplayDecimal Value="Earnings.DailyRebaseAmount" Unit="TITANO" />
+                <DisplayDecimal Value="State.Earnings.DailyRebaseAmount" Unit="TITANO" />
             </div>
         </Display>
     </div>
@@ -132,29 +102,15 @@
 </div>
 
 @code {
-    [Parameter]
-    public CoinGeckoSimplePriceItemModel Price { get; set; }
-    [Parameter]
-    public BscScanResultItemModel InitialBalance { get; set; }
-    [Parameter]
-    public TitanoBalancesModel Balances { get; set; }
-    [Parameter]
-    public TitanoEarningsModel Earnings { get; set; }
+    [CascadingParameter(Name = "State")]
+    public State State { get; set; }
+
     [Parameter]
     public BscScanHoldersModel Holders { get; set; }    
-    [Parameter]
-    public string Currency { get; set; }
-
-    private string _currencySymbol;
     
     private int? _rebaseCountdownMinutes;
     private int? _rebaseCountdownSeconds;
     
-    protected override void OnParametersSet()
-    {
-        _currencySymbol = Currencies.Symbols[Currency];
-    }    
-
     [JSInvokable]
     public async Task SetRebaseCountdownAsync()
     {
@@ -169,15 +125,5 @@
         }
 
         StateHasChanged();
-    }
-
-    private decimal BalanceAmountIncrease(decimal initialBalance, decimal balanceAmount)
-    {
-        return balanceAmount - initialBalance;
-    }
-
-    private decimal BalanceAmountValueIncrease(decimal initialBalance, decimal balanceAmount)
-    {
-        return BalanceAmountIncrease(initialBalance, balanceAmount) * Price.In(Currency);
     }
 }

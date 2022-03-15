@@ -46,7 +46,7 @@ public class TitanoService
             dailyRebaseAmountValue);
     }
 
-    public async Task<IReadOnlyCollection<TitanoForecastItem>> GetForecastItems(decimal price, decimal balanceAmount)
+    public async Task<IReadOnlyCollection<TitanoForecastItem>> GetForecastItemsAsync(decimal price, decimal balanceAmount)
     {
         var localDatetime = await _timeZoneService.GetLocalDateTime(RebaseTime);
 

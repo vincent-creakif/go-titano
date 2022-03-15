@@ -1,0 +1,25 @@
+﻿<div class="topbar w-full px-2 bg-neutral font-mono">
+    <Display If="InitialBalance is null || State.Balances is null">
+        loading...
+    </Display>
+    <Display If="InitialBalance is not null && State.Balances is not null">
+        First deposit: <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
+        (<span class="opacity-70">
+            <DisplayDate Value="InitialBalance.CreatedAt" StringFormat="yyyy-MM-dd" />
+        </span>)
+        &nbsp;-&nbsp;Increased value: <DisplayDecimal Value="BalanceAmountValueIncrease()" CurrencySymbol="@State.CurrencySymbol" />
+    </Display>
+</div>
+
+@code {
+    [CascadingParameter(Name = "State")]
+    public State State { get; set; }
+
+    [Parameter]
+    public BscScanResultItemModel InitialBalance { get; set; }
+
+    private decimal? BalanceAmountValueIncrease()
+    {
+        return (State.Balances.BalanceAmount - InitialBalance.Value) * State.Price?.In(State.Currency);
+    }
+}

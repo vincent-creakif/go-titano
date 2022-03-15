@@ -26,10 +26,22 @@ body {
     letter-spacing: .02rem;
 }
 
+.topbar {
+    position: absolute;
+    display: flex;
+    line-height: 2rem;
+    justify-content: center;
+    font-size: .7rem;
+    opacity: .8;
+}
+
 .titano {
     display: inline-flex;
     height: 74px;
     justify-content: center;
+}
+.titano svg {
+    z-index: 10;
 }
 
 .stat {

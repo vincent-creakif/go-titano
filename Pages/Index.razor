@@ -16,7 +16,7 @@
 
     <div class="w-9/12 p-4">
         <div class="columns-1">
-            <div class="text-right">
+            <div class="flex justify-end">
                 <Display If="_connectedWallet is null">
                     <button class="btn btn-sm btn-warning gap-2" @onclick="async() => await ConnectWalletAsync()">
                         <img src="public/img/metamask.svg" width="32" />
@@ -24,19 +24,16 @@
                     </button>
                 </Display>
                 <Display If="_connectedWallet is not null">
-                    <div class="dropdown dropdown-hover absolute">
-                        <label tabindex="0" class="btn m-1">Hover</label>
-                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                            @foreach (var currency in CurrenciesGroups.CurrenciesAvailable)
-                            {
-                                <li @onclick="async () => await SetCurrencyAsync(currency)">
-                                    <a>@currency</a>
-                                </li>
-                            }
-                        </ul>
+                    <div class="btn-group opacity-90">
+                        @foreach (var currency in CurrenciesGroups.CurrenciesAvailable)
+                        {
+                            <button class="btn btn-sm @(_state?.Currency == currency ? "btn-primary" : "btn-outline")" @onclick="async () => await SetCurrencyAsync(currency)">
+                                @currency
+                            </button>
+                        }
                     </div>
 
-                    <button class="btn btn-sm btn-warning relative z-10" @onclick="async() => await DisconnectWalletAsync()">
+                    <button class="btn btn-sm btn-warning ml-4" @onclick="async() => await DisconnectWalletAsync()">
                         Disconnect
                     </button>
                 </Display>
@@ -58,11 +55,10 @@
     private IReadOnlyCollection<TitanoForecastItem> _titanoForecastItems;
     private decimal _currentBalanceAmount;
     private string _connectedWallet;
+    private string _currentCurrency = Currencies.Usd;
 
     protected override async Task OnAfterFirstRenderAndParametersSetAsync()
     {
-        _state = new(Currencies.Usd);
-
         await ConnectWalletAsync();
     }
 
@@ -87,6 +83,7 @@
     [JSInvokable]
     public async Task SetConnectedWalletAsync(string wallet)
     {
+        _state = new(_currentCurrency);
         _connectedWallet = wallet;
         RefreshState(false);
     }
@@ -97,9 +94,10 @@
         await JsRuntime.InvokeVoidAsync("resetApp");
 
         _connectedWallet = null;
-        _state.Clear();
         _titanoHolders = null;
         _titanoForecastItems = null;
+        _currentBalanceAmount = 0;
+        _state.Clear();
         RefreshState(false);
     }
 
@@ -179,6 +177,7 @@
     {
         _state.Currency = currency;
         _state.Balances = _state.Balances.WithBalanceAmountValue(_currentBalanceAmount * _state.Price.In(_state.Currency));
+        _currentCurrency = currency;
 
         GetTitanoEarningsAsync();
         await GetForecastAsync();

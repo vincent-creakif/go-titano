@@ -29,10 +29,13 @@ body {
 .topbar {
     position: absolute;
     display: flex;
-    line-height: 2rem;
     justify-content: center;
     font-size: .7rem;
     opacity: .8;
+}
+
+.topbar span {
+    line-height: 2rem;
 }
 
 .titano {

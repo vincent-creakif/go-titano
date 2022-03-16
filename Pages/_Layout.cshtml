@@ -53,7 +53,7 @@ $$ |  $$ |$$ |  $$ |         $$ |   $$ |  $$ |$$\ $$  __$$ |$$ |  $$ |$$ |  $$ |
                      // - true to mean success
                      // - false to mean we reached the server, but it rejected the connection (e.g., unknown circuit ID)
                      // - exception to mean we didn't reach the server (this can be sync or async)
-                     console.log("Starting Reconnect attempt #"+(i+1)+" ...");
+                     console.log("Trying reconnection attempt #"+(i+1)+" ...");
                      const result = await window.Blazor.reconnect();
                      if (!result) {
                          // If the server responded and refused to reconnect, log it

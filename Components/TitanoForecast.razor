@@ -162,7 +162,7 @@
     {
         if (Items is not null)
         {
-            _pageCount = Items.YearlyPageCount();
+            ForecastViewChanged(_forecastView);
             StateHasChanged();
         }
     }

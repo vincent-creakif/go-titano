@@ -8,7 +8,9 @@
 <PageTitle>Go Titano!</PageTitle>
 
 <CascadingValue Name="State" Value="_state">
-    <TopBar InitialBalance="_initialBalance" />
+    <Display If="_connectedWallet is not null">
+        <TopBar InitialBalance="_initialBalance" />
+    </Display>
 
     <div class="w-3/12 p-3 pt-0 flex flex-col">
         <TitanoStats Holders="_titanoHolders" @ref="_titanoStats" />
@@ -16,7 +18,7 @@
 
     <div class="w-9/12 p-4">
         <div class="columns-1">
-            <div class="flex justify-end">
+            <div class="relative flex justify-end z-10">
                 <Display If="_connectedWallet is null">
                     <button class="btn btn-sm btn-warning gap-2" @onclick="async() => await ConnectWalletAsync()">
                         <img src="public/img/metamask.svg" width="32" />

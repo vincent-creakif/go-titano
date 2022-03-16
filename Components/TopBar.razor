@@ -8,7 +8,10 @@
             (<span class="opacity-70">
                 <DisplayDate Value="InitialBalance.CreatedAt" StringFormat="yyyy-MM-dd" />
             </span>)
-            - Increased value: <DisplayDecimal Value="BalanceAmountValueIncrease()" CurrencySymbol="@State.CurrencySymbol" />
+            - Increase: <DisplayDecimal Value="@(State.Balances.BalanceAmount - InitialBalance.Value)" Unit="TITANO" />
+            (<span class="opacity-80">
+                <DisplayDecimal Value="BalanceAmountValueIncrease()" CurrencySymbol="@State.CurrencySymbol" />
+            </span>)
         </Display>
     </span>
 </div>

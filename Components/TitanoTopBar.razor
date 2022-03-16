@@ -1,0 +1,56 @@
+﻿@inject TimeZoneService TimeZoneService
+
+<div class="topbar w-full font-mono">
+    <span class="px-3 bg-neutral rounded-b-xl">
+        <Display If="InitialBalance is null || State.Balances is null">
+            loading...
+        </Display>
+        <Display If="InitialBalance is not null && State.Balances is not null">
+            First deposit: <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
+            (<span class="opacity-70">@FirstDepositWas()</span>)
+            <Display If="BalanceIncrease > 0">
+                - Increase: <DisplayDecimal Value="BalanceIncrease" Unit="TITANO" />
+                (<span class="opacity-80">
+                    <DisplayDecimal Value="BalanceAmountValueIncrease" CurrencySymbol="@State.CurrencySymbol" />
+                </span>)
+            </Display>
+        </Display>
+    </span>
+</div>
+
+@code {
+    [CascadingParameter(Name = "State")]
+    public State State { get; set; }
+
+    [Parameter]
+    public BscScanResultItemModel InitialBalance { get; set; }
+
+    private string Test()
+    {
+        return "ok";
+    }
+
+    private string FirstDepositWas()
+    {
+        TimeSpan timeSpan = default;
+        var maxUnit = TimeUnit.Day;
+        var precision = 1;
+        
+        InvokeAsync(async () =>
+        {
+            var localTime = await TimeZoneService.GetLocalDateTime(DateTime.UtcNow);
+            timeSpan = TimeSpan.FromDays((localTime - InitialBalance.CreatedAt).TotalDays);
+
+            if (timeSpan.Days > 40)
+            {
+                maxUnit = TimeUnit.Month;
+                precision = 2;
+            }
+        });
+
+        return $"{timeSpan.Humanize(maxUnit: maxUnit, precision: precision)} ago";
+    }
+
+    private decimal BalanceIncrease => (State.Balances.BalanceAmount - InitialBalance.Value);
+    private decimal? BalanceAmountValueIncrease => BalanceIncrease * State.Price?.In(State.Currency);
+}

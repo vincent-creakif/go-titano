@@ -1,5 +1,5 @@
 ﻿async function connectionDown(options) {
-    console.log("Connection DOWN!");
+    console.log("Connection Down!");
     for (let i = 0; i < options.maxRetries; i++) {
         await this.delay(options.retryIntervalMilliseconds);
 
@@ -13,7 +13,7 @@
                 // Reconnected!
                 return;
             } else {
-                console.error("Server Rejected");
+                console.error("Server rejected");
             }
         }
         catch {
@@ -28,12 +28,12 @@ function delay(durationInMs) {
 }
 
 function connectionUp(e) {
-    console.log("Connection UP!");
+    console.log("Connection Up!");
 }
 
 window.Blazor.start({
     reconnectionOptions: {
-        maxRetries: 30,
+        maxRetries: 15,
         retryIntervalMilliseconds: 500,
     },
     reconnectionHandler: {

@@ -33,6 +33,9 @@ body {
     font-size: .7rem;
     opacity: .8;
 }
+.topbar .tooltip:before {
+    font-size: .7rem;
+}
 
 .topbar span {
     line-height: 2rem;

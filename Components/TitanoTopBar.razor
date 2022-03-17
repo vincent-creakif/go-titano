@@ -27,16 +27,10 @@
     [Parameter]
     public BscScanResultItemModel InitialBalance { get; set; }
 
-    private string Test()
-    {
-        return "ok";
-    }
-
     private string FirstDepositWas()
     {
         TimeSpan timeSpan = default;
         var maxUnit = TimeUnit.Day;
-        var precision = 1;
 
         InvokeAsync(async () =>
         {
@@ -46,11 +40,10 @@
             if (timeSpan.Days > 40)
             {
                 maxUnit = TimeUnit.Month;
-                precision = 2;
             }
         });
 
-        return $"{timeSpan.Humanize(maxUnit: maxUnit, precision: precision)} ago";
+        return $"{timeSpan.Humanize(maxUnit: maxUnit, precision: 2)} ago";
     }
 
     private decimal BalanceIncrease => (State.Balances.BalanceAmount - InitialBalance.Value);

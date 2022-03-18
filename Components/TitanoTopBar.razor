@@ -1,7 +1,7 @@
 ﻿@inject TimeZoneService TimeZoneService
 
 <div class="topbar w-full font-mono">
-    <span class="px-3 bg-neutral rounded-b-xl">
+    <div class="px-3 bg-neutral rounded-b-xl">
         <Display If="InitialBalance is null || State.Balances is null">
             loading...
         </Display>
@@ -20,12 +20,12 @@
                         x <DisplayDecimal Value="BalanceIncreaseMultiplier" />
                     </Display>
                 </div>
-                <span class="badge badge-accent badge-outline">
+                <span class="badge badge-accent badge-outline font-sans">
                     <DisplayDecimal Value="BalanceAmountValueIncrease" CurrencySymbol="@State.CurrencySymbol" />
                 </span>
             </Display>
         </Display>
-    </span>
+    </div>
 </div>
 
 @code {

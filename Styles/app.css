@@ -40,7 +40,7 @@ body {
     font-size: .7rem;
 }
 
-.topbar span {
+.topbar > div {
     line-height: 2rem;
 }
 

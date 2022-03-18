@@ -5,15 +5,49 @@ public class CoinGeckoService
     private static readonly HttpClient _httpClient = new();
 
     private readonly Uri _apiBaseUri = new("https://api.coingecko.com/api/v3");
-    private readonly CultureInfo _culture = CultureInfo.CreateSpecificCulture("en-US");
-    
+
     private TimeZoneService _timeZoneService;
 
     public CoinGeckoService(TimeZoneService timeZoneService)
     {
         _timeZoneService = timeZoneService;
-    }    
-    
+    }
+
+    public async Task<IReadOnlyCollection<CoinGeckoHistoryItemModel>> GetMarketChartAsync(string coinId, string currency, CancellationToken ct)
+    {
+        var uri = _apiBaseUri
+            .Append("coins", coinId, "market_chart")
+            .AppendParameter("vs_currency", currency)
+            .AppendParameter("days", "90");
+
+        try
+        {
+            var response = await _httpClient.GetAsync(uri, ct);
+            var responseContent = await response.Content.ReadAsStringAsync(ct);
+
+            var result = responseContent.JsonDeserializeCaseInsensitive<CoinGeckoMarketChartItemModel>();
+
+            var historyResult = new List<CoinGeckoHistoryItemModel>();
+            foreach (var item in result.Items)
+            {
+                var firstValue = item.ElementAt(0).ToString()[0..^3];
+                var secondValue = item.ElementAt(1).ToString();
+
+                historyResult.Add(new(
+                    long.Parse(firstValue).UnixTimeStampToUtcDateTime(),
+                    decimal.Parse(secondValue)));
+            }
+
+            return historyResult.ToList();
+        }
+        catch (Exception)
+        {
+
+        }
+
+        return null;
+    }
+
     public async Task<CoinGeckoSimplePriceItemModel> GetTitanoPriceAsync(CancellationToken ct)
     {
         var result = await GetSimplePriceAsync(new[] { Coins.Titano }, ct);

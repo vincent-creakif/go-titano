@@ -6,12 +6,12 @@
             loading...
         </Display>
         <Display If="InitialBalance is not null && State.Balances is not null">
-            First deposit: <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
+            <strong>first deposit:</strong> <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
             <div class="tooltip tooltip-bottom" data-tip="@InitialBalance.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
                 (<span class="opacity-70">@FirstDepositWas()</span>)
             </div>
             <Display If="BalanceIncrease > 0">
-                - Increase: <DisplayDecimal Value="BalanceIncrease" Unit="TITANO" />
+                - <strong>increase:</strong> <DisplayDecimal Value="BalanceIncrease" Unit="TITANO" />
                 <span class="badge badge-secondary badge-outline">+@(BalanceIncreasePercentage)%</span>
                 <span class="badge badge-accent badge-outline">
                     +<DisplayDecimal Value="BalanceAmountValueIncrease" CurrencySymbol="@State.CurrencySymbol" />

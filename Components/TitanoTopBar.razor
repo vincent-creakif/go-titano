@@ -12,7 +12,14 @@
             </div>
             <Display If="BalanceIncrease > 0">
                 - <strong>increase:</strong> <DisplayDecimal Value="BalanceIncrease" Unit="TITANO" />
-                <span class="badge badge-secondary badge-outline font-sans">@(BalanceIncreasePercentage)%</span>
+                <div class="badge badge-secondary badge-outline font-sans text-center cursor-pointer" @onclick=@(() => _displayBalanceIncreasePercentage = !_displayBalanceIncreasePercentage)>
+                    <Display If="_displayBalanceIncreasePercentage">
+                        <DisplayDecimal Value="BalanceIncreasePercentage" />%
+                    </Display>
+                    <Display If="!_displayBalanceIncreasePercentage">
+                        x <DisplayDecimal Value="BalanceIncreaseMultiplier" />
+                    </Display>
+                </div>
                 <span class="badge badge-accent badge-outline">
                     <DisplayDecimal Value="BalanceAmountValueIncrease" CurrencySymbol="@State.CurrencySymbol" />
                 </span>
@@ -27,6 +34,8 @@
 
     [Parameter]
     public BscScanResultItemModel InitialBalance { get; set; }
+
+    private bool _displayBalanceIncreasePercentage = true;
 
     private string FirstDepositWas()
     {
@@ -49,5 +58,6 @@
 
     private decimal BalanceIncrease => (State.Balances.BalanceAmount - InitialBalance.Value);
     private decimal? BalanceAmountValueIncrease => BalanceIncrease * State.Price?.In(State.Currency);
-    private int BalanceIncreasePercentage => (int)((State.Balances.BalanceAmount / InitialBalance.Value) * 100);
+    private decimal BalanceIncreasePercentage => ((State.Balances.BalanceAmount - InitialBalance.Value) / InitialBalance.Value) * 100;
+    private decimal BalanceIncreaseMultiplier => 1 + BalanceIncreasePercentage / 100;
 }

@@ -12,9 +12,9 @@
             </div>
             <Display If="BalanceIncrease > 0">
                 - <strong>increase:</strong> <DisplayDecimal Value="BalanceIncrease" Unit="TITANO" />
-                <span class="badge badge-secondary badge-outline font-sans">+@(BalanceIncreasePercentage)%</span>
+                <span class="badge badge-secondary badge-outline font-sans">@(BalanceIncreasePercentage)%</span>
                 <span class="badge badge-accent badge-outline">
-                    +<DisplayDecimal Value="BalanceAmountValueIncrease" CurrencySymbol="@State.CurrencySymbol" />
+                    <DisplayDecimal Value="BalanceAmountValueIncrease" CurrencySymbol="@State.CurrencySymbol" />
                 </span>
             </Display>
         </Display>

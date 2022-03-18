@@ -36,6 +36,9 @@ body {
 .topbar .tooltip:before {
     font-size: .7rem;
 }
+.topbar .badge {
+    font-size: .7rem;
+}
 
 .topbar span {
     line-height: 2rem;

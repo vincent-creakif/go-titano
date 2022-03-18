@@ -12,9 +12,10 @@
             </div>
             <Display If="BalanceIncrease > 0">
                 - Increase: <DisplayDecimal Value="BalanceIncrease" Unit="TITANO" />
-                (<span class="opacity-90">
-                    <DisplayDecimal Value="BalanceAmountValueIncrease" CurrencySymbol="@State.CurrencySymbol" />
-                </span>)
+                <span class="badge badge-secondary badge-outline">+@(BalanceIncreasePercentage)%</span>
+                <span class="badge badge-accent badge-outline">
+                    +<DisplayDecimal Value="BalanceAmountValueIncrease" CurrencySymbol="@State.CurrencySymbol" />
+                </span>
             </Display>
         </Display>
     </span>
@@ -48,4 +49,5 @@
 
     private decimal BalanceIncrease => (State.Balances.BalanceAmount - InitialBalance.Value);
     private decimal? BalanceAmountValueIncrease => BalanceIncrease * State.Price?.In(State.Currency);
+    private int BalanceIncreasePercentage => (int)((State.Balances.BalanceAmount / InitialBalance.Value) * 100);
 }

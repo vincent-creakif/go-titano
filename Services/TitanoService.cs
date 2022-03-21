@@ -4,10 +4,10 @@ public class TitanoService
 {
     private readonly CultureInfo _culture = CultureInfo.CreateSpecificCulture("en-US");
 
-    private const decimal DailyRoiInPercent = 1.89984m;
+    private const decimal DailyRoiInPercent = 1.8999m / 100;
     private const int RebaseFrequencyPerHour = 2;
     private const int RebaseFrequencyPerDay = 24 * RebaseFrequencyPerHour;
-    private const decimal RebaseRoi = (DailyRoiInPercent / RebaseFrequencyPerDay) / 100;
+    private const decimal RebaseRoi = DailyRoiInPercent / RebaseFrequencyPerDay;
 
     private const int MaxForecastDurationInYears = 2;
 
@@ -53,7 +53,7 @@ public class TitanoService
         var weekOffset = 0;
 
         var targetDate = localDatetime.AddYears(MaxForecastDurationInYears);
-        // Set target date to the last day of the current month in MaxForecastDurationInYears ahead
+        // Set target date to the last day of the current month MaxForecastDurationInYears ahead
         targetDate = new DateTime(targetDate.Year, targetDate.Month, DateTime.DaysInMonth(targetDate.Year, targetDate.Month)).Date;
 
         var totalDays = (targetDate - localDatetime).TotalDays - 1;

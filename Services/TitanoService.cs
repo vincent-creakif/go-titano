@@ -4,7 +4,7 @@ public class TitanoService
 {
     private readonly CultureInfo _culture = CultureInfo.CreateSpecificCulture("en-US");
 
-    private const decimal DailyRoiInPercent = 1.8999m / 100;
+    private const decimal DailyRoiInPercent = 1.917m / 100;
     private const int RebaseFrequencyPerHour = 2;
     private const int RebaseFrequencyPerDay = 24 * RebaseFrequencyPerHour;
     private const decimal RebaseRoi = DailyRoiInPercent / RebaseFrequencyPerDay;

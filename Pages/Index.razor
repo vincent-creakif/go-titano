@@ -76,7 +76,7 @@
         await JsRuntime.InvokeAsync<string>(
             "connectWalletAsync",
             Wallets.Metamask,
-            Coins.Contracts[Coins.Titano],
+            Coins.Metadata[Coins.Titano].Contract,
             DotNetObjectReference.Create(this));
 
         RefreshState(false);
@@ -149,7 +149,7 @@
     public async Task GetTitanoHoldersAsync()
     {
         _titanoHolders = await BscScanService.GetTotalHoldersAsync(
-            Coins.Contracts[Coins.Titano],
+            Coins.Metadata[Coins.Titano].Contract,
             ct);
 
         RefreshState(false);
@@ -169,7 +169,7 @@
     {
         _initialBalance = await BscScanService.GetInitialBalanceAsync(
             walletAddress,
-            Coins.Contracts[Coins.Titano],
+            Coins.Metadata[Coins.Titano].Contract,
             ct);
 
         StateHasChanged();

@@ -6,19 +6,31 @@ public class CoinGeckoService
 
     private readonly Uri _apiBaseUri = new("https://api.coingecko.com/api/v3");
 
-    private TimeZoneService _timeZoneService;
+    private readonly TimeZoneService _timeZoneService;
 
-    public CoinGeckoService(TimeZoneService timeZoneService)
+    private readonly string _historyPath;
+
+    public CoinGeckoService(IConfiguration configuration, TimeZoneService timeZoneService)
     {
         _timeZoneService = timeZoneService;
+        _historyPath = configuration.GetValue<string>("CoinGeckoHistoryPath");
     }
 
-    public async Task<IReadOnlyCollection<CoinGeckoHistoryItemModel>> GetMarketChartAsync(string coinId, string currency, CancellationToken ct)
+    public async Task GetMonthlyMarketChartAsync(
+        string coinId,
+        string currency,
+        DateTimeOffset month,
+        CancellationToken ct)
     {
+        var lastDayOfMonth = DateTime.DaysInMonth(month.Year, month.Month);
+        var from = new DateTimeOffset(new DateTime(month.Year, month.Month, 1, 0, 0, 0)).ToUnixTimeSeconds();
+        var to = new DateTimeOffset(new DateTime(month.Year, month.Month, lastDayOfMonth, 23, 59, 59)).ToUnixTimeSeconds();
+
         var uri = _apiBaseUri
-            .Append("coins", coinId, "market_chart")
+            .Append("coins", Coins.Metadata[coinId].PlatformId, "contract", Coins.Metadata[coinId].Contract, "market_chart", "range")
             .AppendParameter("vs_currency", currency)
-            .AppendParameter("days", "90");
+            .AppendParameter("from", from.ToString())
+            .AppendParameter("to", to.ToString());
 
         try
         {
@@ -34,18 +46,24 @@ public class CoinGeckoService
                 var secondValue = item.ElementAt(1).ToString();
 
                 historyResult.Add(new(
-                    long.Parse(firstValue).UnixTimeStampToUtcDateTime(),
+                    long.Parse(firstValue).UnixTimeStampToDateTime(),
                     decimal.Parse(secondValue)));
             }
 
-            return historyResult.ToList();
+            var historyPath = Path.Combine(_historyPath, coinId, currency);
+            if (!Directory.Exists(historyPath))
+            {
+                Directory.CreateDirectory(historyPath);
+            }
+
+            var filePath = Path.Combine(historyPath, $"{month:yyyy-MM}.json");
+            await using FileStream createStream = File.Create(filePath);
+            await JsonSerializer.SerializeAsync(createStream, historyResult, cancellationToken: ct);
         }
         catch (Exception)
         {
 
         }
-
-        return null;
     }
 
     public async Task<CoinGeckoSimplePriceItemModel> GetTitanoPriceAsync(CancellationToken ct)

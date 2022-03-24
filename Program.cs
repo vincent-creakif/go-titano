@@ -3,11 +3,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddOptions();
 
 builder.Services.AddTransient<BscScanService>();
 builder.Services.AddTransient<CoinGeckoService>();
-builder.Services.AddTransient<TitanoService>();
 builder.Services.AddScoped<TimeZoneService>();
+builder.Services.AddTransient<TitanoService>();
+
+var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{environmentName}.json", optional: false, reloadOnChange: true);
 
 var app = builder.Build();
 

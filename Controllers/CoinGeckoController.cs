@@ -17,11 +17,22 @@ public class CoinGeckoController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestResult))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(UnauthorizedResult))]
-    [HttpGet("test")]
-    public async Task<ActionResult> Test(CancellationToken ct)
+    [HttpGet("MonthlyMarketChart")]
+    public async Task<ActionResult> GetMonthlyMarketChartAsync(CancellationToken ct)
     {
-        await _coinGeckoService.GetMarketChartAsync(Coins.Titano, Currencies.Usd, ct);
+        var now = DateTime.UtcNow;
+        foreach (var currency in CurrenciesGroups.CurrenciesAvailable)
+        {
+            var month = new DateTimeOffset(new DateTime(2021, 11, 1));
 
-        return NotFound();
+            var totalMonths = (now.Year * 12 + now.Month) - (month.Year * 12 + month.Month);
+            for (var i = 0; i < totalMonths; i++)
+            {
+                await _coinGeckoService.GetMonthlyMarketChartAsync(Coins.Titano, currency, month, ct);
+                month = month.AddMonths(1);
+            }
+        }
+        
+        return Ok();
     }
 }

@@ -9,7 +9,7 @@
 
 <CascadingValue Name="State" Value="_state">
     <Display If="_connectedWallet is not null">
-        <TitanoTopBar InitialBalance="_initialBalance" />
+        <TitanoTopBar />
     </Display>
 
     <div class="w-3/12 p-3 pt-0 flex flex-col">
@@ -52,7 +52,7 @@
     private State _state;
 
     private TitanoStats _titanoStats;
-    private BscScanResultItemModel _initialBalance;
+    private IReadOnlyCollection<CoinGeckoPriceHistoryItemWithCurrencyModel> _initialPriceHistory;
     private BscScanHoldersModel _titanoHolders;
     private IReadOnlyCollection<TitanoForecastItem> _titanoForecastItems;
     private decimal _currentBalanceAmount;
@@ -72,7 +72,7 @@
     }
 
     private async Task ConnectWalletAsync()
-    {
+    {        
         await JsRuntime.InvokeAsync<string>(
             "connectWalletAsync",
             Wallets.Metamask,
@@ -114,6 +114,8 @@
             await GetForecastAsync();
             RefreshState(false);
         }
+
+        await CoinGeckoService.GetMonthlyPriceHistory(Coins.Titano, ct);
     }
 
     [JSInvokable]
@@ -167,9 +169,14 @@
     [JSInvokable]
     public async Task GetInitialBalanceAsync(string walletAddress)
     {
-        _initialBalance = await BscScanService.GetInitialBalanceAsync(
+        _state.InitialBalance = await BscScanService.GetInitialBalanceAsync(
             walletAddress,
             Coins.Metadata[Coins.Titano].Contract,
+            ct);
+
+        _state.InitialPrices = await CoinGeckoService.GetPriceHistoryValueAsync(
+            Coins.Titano,
+            _state.InitialBalance.CreatedAt.ToUniversalTime(),
             ct);
 
         StateHasChanged();

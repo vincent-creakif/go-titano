@@ -1,23 +1,20 @@
-using System.Text.RegularExpressions;
-
 namespace Creakif.GoTitano.Services;
 
 public class BscScanService
 {
-    private const string ApiKey = "R48Q73AZQM64G63PB7SDFUGAT8X38BDJ9E";
-
     private const string TotalHoldersRegex = @"\$?(\d{1,3}(\,\d{3})*|(\d+))(\.\d{1,2})? addresses";
 
     private static readonly HttpClient _httpClient = new();
 
     private readonly Uri _baseUri = new("https://goto.bscscan.com/");
-    private readonly Uri _apiBaseUri = new("https://api.bscscan.com/api");
-    
+
+    private BscScanSettings _settings;
     private TimeZoneService _timeZoneService;
 
-    public BscScanService(TimeZoneService timeZoneService)
+    public BscScanService(IOptions<BscScanSettings> settings, TimeZoneService timeZoneService)
     {
         _timeZoneService = timeZoneService;
+        _settings = settings.Value;
     }       
     
     public async Task<BscScanResultItemModel> GetInitialBalanceAsync(
@@ -25,8 +22,8 @@ public class BscScanService
         string contractAddress,
         CancellationToken ct)
     {
-        var uri = _apiBaseUri
-            .AppendParameter("apikey", ApiKey)
+        var uri = _settings.ApiBaseUri
+            .AppendParameter("apikey", _settings.ApiKey)
             .AppendParameter("module", "account")
             .AppendParameter("action", "tokentx")
             .AppendParameter("address", walletAddress)

@@ -2,12 +2,14 @@
 
 <div class="topbar w-full font-mono">
     <div class="px-3 bg-neutral rounded-b-xl">
-        <Display If="InitialBalance is null || State.Balances is null">
+        <Display If="State.InitialBalance is null || State.Balances is null">
             loading...
         </Display>
-        <Display If="InitialBalance is not null && State.Balances is not null">
-            <strong>first deposit:</strong> <DisplayDecimal Value="InitialBalance.Value" Unit="TITANO" />
-            <div class="tooltip tooltip-bottom" data-tip="@InitialBalance.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
+        <Display If="State.InitialBalance is not null && State.Balances is not null">
+            <div class="tooltip tooltip-bottom" data-tip="@($"{State.CurrencySymbol}{InitialBalanceAmountValue.ToString("N2")}")">
+                <strong>first deposit:</strong> <DisplayDecimal Value="State.InitialBalance.Value" Unit="TITANO" />
+            </div>
+            <div class="tooltip tooltip-bottom" data-tip="@State.InitialBalance.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
                 (<span class="opacity-70">@FirstDepositWas()</span>)
             </div>
             <Display If="BalanceIncrease > 0">
@@ -32,9 +34,6 @@
     [CascadingParameter(Name = "State")]
     public State State { get; set; }
 
-    [Parameter]
-    public BscScanResultItemModel InitialBalance { get; set; }
-
     private bool _displayBalanceIncreasePercentage = true;
 
     private string FirstDepositWas()
@@ -45,7 +44,7 @@
         InvokeAsync(async () =>
         {
             var localTime = await TimeZoneService.GetLocalDateTime(DateTime.UtcNow);
-            timeSpan = TimeSpan.FromDays((localTime - InitialBalance.CreatedAt).TotalDays);
+            timeSpan = TimeSpan.FromDays((localTime - State.InitialBalance.CreatedAt).TotalDays);
 
             if (timeSpan.Days > 40)
             {
@@ -56,8 +55,12 @@
         return $"{timeSpan.Humanize(maxUnit: maxUnit, precision: 2)} ago";
     }
 
-    private decimal BalanceIncrease => (State.Balances.BalanceAmount - InitialBalance.Value);
-    private decimal? BalanceAmountValueIncrease => BalanceIncrease * State.Price?.In(State.Currency);
-    private decimal BalanceIncreasePercentage => ((State.Balances.BalanceAmount - InitialBalance.Value) / InitialBalance.Value) * 100;
+    private decimal InitialPrice => State.InitialPrices.Single(x => x.Currency.Equals(State.Currency)).Price;
+    private decimal InitialBalanceAmountValue => State.InitialBalance.Value * InitialPrice;
+
+    private decimal BalanceIncrease => (State.Balances.BalanceAmount - State.InitialBalance.Value);
+    private decimal? BalanceAmountValueIncrease => (State.Balances.BalanceAmount * State.Price?.In(State.Currency)) - (State.InitialBalance.Value * InitialPrice);
+
+    private decimal BalanceIncreasePercentage => ((State.Balances.BalanceAmount - State.InitialBalance.Value) / State.InitialBalance.Value) * 100;
     private decimal BalanceIncreaseMultiplier => 1 + BalanceIncreasePercentage / 100;
 }

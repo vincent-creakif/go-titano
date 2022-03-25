@@ -1,3 +1,5 @@
+using Creakif.GoTitano.Settings;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,6 +17,10 @@ var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{environmentName}.json", optional: false, reloadOnChange: true);
+
+// Register service settings
+builder.Services.Configure<BscScanSettings>(builder.Configuration.GetSection("BscScanSettings"));
+builder.Services.Configure<CoinGeckoSettings>(builder.Configuration.GetSection("CoinGeckoSettings"));
 
 var app = builder.Build();
 

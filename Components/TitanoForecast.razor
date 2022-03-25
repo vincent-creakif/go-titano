@@ -167,41 +167,29 @@
         }
     }
 
-    private IReadOnlyCollection<DateTime> ForecastItems()
+    private IReadOnlyCollection<DateTime> ForecastItems() => _forecastView switch
     {
-        return _forecastView switch
-        {
-            ForecastViewEnum.Yearly => Items.Months(_yearOffset),
-            ForecastViewEnum.Weekly => Items.WeekDays(_weekOffset)
-        };
-    }
+        ForecastViewEnum.Yearly => Items.Months(_yearOffset),
+        ForecastViewEnum.Weekly => Items.WeekDays(_weekOffset)
+    };
 
-    private IEnumerable<TitanoForecastItem> ForecastDateItems(DateTime forecastDate)
+    private IEnumerable<TitanoForecastItem> ForecastDateItems(DateTime forecastDate) => _forecastView switch
     {
-        return _forecastView switch
-        {
-            ForecastViewEnum.Yearly => Items.Where(x => x.Day.Year == forecastDate.Year && x.Day.Month == forecastDate.Month),
-            ForecastViewEnum.Weekly => Items.Where(x => x.Day.Date == forecastDate.Date)
-        };
-    }
+        ForecastViewEnum.Yearly => Items.Where(x => x.Day.Year == forecastDate.Year && x.Day.Month == forecastDate.Month),
+        ForecastViewEnum.Weekly => Items.Where(x => x.Day.Date == forecastDate.Date)
+    };
 
-    private string DateColumnCaption()
+    private string DateColumnCaption() => _forecastView switch
     {
-        return _forecastView switch
-        {
-            ForecastViewEnum.Yearly => "Month",
-            ForecastViewEnum.Weekly => "Day"
-        };
-    }
+        ForecastViewEnum.Yearly => "Month",
+        ForecastViewEnum.Weekly => "Day"
+    };
 
-    private string BalanceColumnCaption()
+    private string BalanceColumnCaption() => _forecastView switch
     {
-        return _forecastView switch
-        {
-            ForecastViewEnum.Yearly => "(end of the month)",
-            ForecastViewEnum.Weekly => "(end of the day)"
-        };
-    }
+        ForecastViewEnum.Yearly => "(end of the month)",
+        ForecastViewEnum.Weekly => "(end of the day)"
+    };
 
     private void ForecastViewChanged(ForecastViewEnum forecastView)
     {
@@ -217,14 +205,11 @@
         }
     }
 
-    private int CurrentPage()
+    private int CurrentPage() => _forecastView switch
     {
-        return _forecastView switch
-        {
-            ForecastViewEnum.Yearly => _yearOffset + 1,
-            ForecastViewEnum.Weekly => _weekOffset + 1
-        };
-    }
+        ForecastViewEnum.Yearly => _yearOffset + 1,
+        ForecastViewEnum.Weekly => _weekOffset + 1
+    };
 
     private void PreviousPage()
     {
@@ -252,21 +237,15 @@
         }
     }
 
-    private bool IsPreviousPageDisabled()
+    private bool IsPreviousPageDisabled() => _forecastView switch
     {
-        return _forecastView switch
-        {
-            ForecastViewEnum.Yearly => _yearOffset == 0,
-            ForecastViewEnum.Weekly => _weekOffset == 0
-        };
-    }
+        ForecastViewEnum.Yearly => _yearOffset == 0,
+        ForecastViewEnum.Weekly => _weekOffset == 0
+    };
 
-    private bool IsNextPageDisabled()
+    private bool IsNextPageDisabled() => _forecastView switch
     {
-        return _forecastView switch
-        {
-            ForecastViewEnum.Yearly => _yearOffset == _pageCount - 1,
-            ForecastViewEnum.Weekly => _weekOffset == _pageCount - 1
-        };
-    }
+        ForecastViewEnum.Yearly => _yearOffset == _pageCount - 1,
+        ForecastViewEnum.Weekly => _weekOffset == _pageCount - 1
+    };
 }

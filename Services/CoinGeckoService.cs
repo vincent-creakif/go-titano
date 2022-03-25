@@ -16,11 +16,11 @@ public class CoinGeckoService
 
     public CoinGeckoService(IOptions<CoinGeckoSettings> settings, TimeZoneService timeZoneService)
     {
-        _timeZoneService = timeZoneService;
         _settings = settings.Value;
+        _timeZoneService = timeZoneService;
     }
 
-    public async Task<IReadOnlyCollection<CoinGeckoPriceHistoryModel>> GetMonthlyPriceHistory(string coinId, CancellationToken ct)
+    public async Task<IReadOnlyCollection<CoinGeckoPriceHistoryModel>> GetMonthlyPriceHistoryAsync(string coinId, CancellationToken ct)
     {
         var cacheKey = $"{MonthlyHistoryCacheKey}${coinId}";
 
@@ -60,7 +60,7 @@ public class CoinGeckoService
     {
         dateTime = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour - 1, 45, 0);
 
-        return (await GetMonthlyPriceHistory(coinId, ct))
+        return (await GetMonthlyPriceHistoryAsync(coinId, ct))
             .Where(x => x.CoinId == coinId)
             .SelectMany(x => x.History.ToHistoryWithCurrencyModel(x.Currency))
             .Where(x => x.CreatedAt > dateTime && x.CreatedAt < dateTime.AddHours(1))

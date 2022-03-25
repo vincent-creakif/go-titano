@@ -115,7 +115,7 @@
             RefreshState(false);
         }
 
-        await CoinGeckoService.GetMonthlyPriceHistory(Coins.Titano, ct);
+        await CoinGeckoService.GetMonthlyPriceHistoryAsync(Coins.Titano, ct);
     }
 
     [JSInvokable]

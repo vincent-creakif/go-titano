@@ -13,8 +13,8 @@ public class BscScanService
 
     public BscScanService(IOptions<BscScanSettings> settings, TimeZoneService timeZoneService)
     {
-        _timeZoneService = timeZoneService;
         _settings = settings.Value;
+        _timeZoneService = timeZoneService;
     }       
     
     public async Task<BscScanResultItemModel> GetInitialBalanceAsync(

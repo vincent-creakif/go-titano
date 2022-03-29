@@ -2,16 +2,16 @@
 
 <div class="topbar w-full font-mono">
     <div class="px-3 bg-neutral rounded-b-xl">
-        <Display If="State.InitialBalance is null || State.Balances is null">
+        <Display If="State.InitialBalance is null || State.Balance is null">
             loading...
         </Display>
-        <Display If="State.InitialBalance is not null && State.Balances is not null">
-            <div class="tooltip tooltip-bottom" data-tip="@($"{State.CurrencySymbol}{InitialBalanceAmountValue.ToString("N2")}")">
+        <Display If="State.InitialBalance is not null && State.Balance is not null">
+            <span title="@($"{State.CurrencySymbol}{InitialBalanceAmountValue.ToString("N2")}")">
                 <strong>first deposit:</strong> <DisplayDecimal Value="State.InitialBalance.Value" Unit="TITANO" />
-            </div>
-            <div class="tooltip tooltip-bottom" data-tip="@State.InitialBalance.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
+            </span>
+            <span title="@State.InitialBalance.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
                 (<span class="opacity-70">@FirstDepositWas()</span>)
-            </div>
+            </span>
             <Display If="BalanceIncrease > 0">
                 - <strong>increase:</strong> <DisplayDecimal Value="BalanceIncrease" Unit="TITANO" />
                 <div class="badge badge-secondary badge-outline font-sans text-center cursor-pointer" @onclick=@(() => _displayBalanceIncreasePercentage = !_displayBalanceIncreasePercentage)>
@@ -58,9 +58,9 @@
     private decimal InitialPrice => State.InitialPrices.Single(x => x.Currency.Equals(State.Currency)).Price;
     private decimal InitialBalanceAmountValue => State.InitialBalance.Value * InitialPrice;
 
-    private decimal BalanceIncrease => (State.Balances.BalanceAmount - State.InitialBalance.Value);
-    private decimal? BalanceAmountValueIncrease => (State.Balances.BalanceAmount * State.Price?.In(State.Currency)) - (State.InitialBalance.Value * InitialPrice);
+    private decimal BalanceIncrease => (State.Balance.BalanceAmount - State.InitialBalance.Value);
+    private decimal? BalanceAmountValueIncrease => (State.Balance.BalanceAmount * State.Price?.In(State.Currency)) - (State.InitialBalance.Value * InitialPrice);
 
-    private decimal BalanceIncreasePercentage => ((State.Balances.BalanceAmount - State.InitialBalance.Value) / State.InitialBalance.Value) * 100;
+    private decimal BalanceIncreasePercentage => ((State.Balance.BalanceAmount - State.InitialBalance.Value) / State.InitialBalance.Value) * 100;
     private decimal BalanceIncreaseMultiplier => 1 + BalanceIncreasePercentage / 100;
 }

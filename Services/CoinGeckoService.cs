@@ -87,7 +87,7 @@ public class CoinGeckoService
                 var to = new DateTimeOffset(new DateTime(month.Year, month.Month, lastDayOfMonth, 23, 59, 59)).ToUnixTimeSeconds();
 
                 var uri = _settings.ApiBaseUri
-                    .Append("coins", Coins.Metadata[coinId].PlatformId, "contract", Coins.Metadata[coinId].Contract, "market_chart", "range")
+                    .Append("coins", Coins.Metadata[coinId].CoinGeckoPlatformId, "contract", Coins.Metadata[coinId].Contract, "market_chart", "range")
                     .AppendParameter("vs_currency", currency)
                     .AppendParameter("from", from.ToString())
                     .AppendParameter("to", to.ToString());

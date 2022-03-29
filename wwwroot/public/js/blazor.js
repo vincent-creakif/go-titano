@@ -41,3 +41,7 @@ window.Blazor.start({
         onConnectionUp: e => connectionUp(e)
     }
 });
+
+function setFocusOnElementAsync(element) {
+    element.focus()
+}

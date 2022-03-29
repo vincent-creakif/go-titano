@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inherits RootComponent
+@inject LocalStorageService LocalStorageService
 @inject BscScanService BscScanService
 @inject CoinGeckoService CoinGeckoService
 @inject TitanoService TitanoService
@@ -7,100 +8,226 @@
 
 <PageTitle>Go Titano!</PageTitle>
 
-<CascadingValue Name="State" Value="_state">
-    <Display If="_connectedWallet is not null">
-        <TitanoTopBar />
-    </Display>
+<Display If="_currentWalletAddress is null && !_checkingWalletAddress">
+    <div class="flex flex-col w-full justify-center items-center">
+        <img src="/public/img/titano.svg" class="home-logo" />
 
-    <div class="w-3/12 p-3 pt-0 flex flex-col">
-        <TitanoStats Holders="_titanoHolders" @ref="_titanoStats" />
-    </div>
+        <div class="wallet-address card bg-neutral text-neutral-content">
+            <div class="card-body items-center text-center">
+                <h1 class="card-title pb-3">
+                    Go Titano!
+                </h1>
+                <div class="w-full pb-3">
+                    <input type="text"
+                           class="input input-primary font-mono w-full"
+                           placeholder="Please enter a wallet address"
+                           spellcheck="false"
+                           @bind="_walletAddress"
+                           @bind:event="oninput"
+                           @onkeydown="async (e) => await WalletAddressKeyDownAsync(e)"
+                           @ref="_walletAddressInput">
+                </div>
 
-    <div class="w-9/12 p-4">
-        <div class="columns-1">
-            <div class="relative flex justify-end z-10">
-                <Display If="_connectedWallet is null">
-                    <button class="btn btn-sm btn-warning gap-2" @onclick="async() => await ConnectWalletAsync()">
-                        <img src="public/img/metamask.svg" width="32" />
-                        Connect Wallet
-                    </button>
-                </Display>
-                <Display If="_connectedWallet is not null">
-                    <div class="btn-group opacity-90">
-                        @foreach (var currency in CurrenciesGroups.CurrenciesAvailable)
+                <Display If="_walletAddressHistory?.Any() == true">
+                    <ul>
+                        @foreach (var walletAddress in _walletAddressHistory)
                         {
-                            <button class="btn btn-sm @(_state?.Currency == currency ? "btn-primary" : "btn-outline")" @onclick="async () => await SetCurrencyAsync(currency)">
-                                @currency
-                            </button>
+                            <li class="link link-accent" @onclick="async () => { _walletAddress = walletAddress; await SetWalletAddressAsync(); }">
+                                @walletAddress
+                            </li>
                         }
-                    </div>
-
-                    <button class="btn btn-sm btn-warning ml-4" @onclick="async() => await DisconnectWalletAsync()">
-                        Disconnect
-                    </button>
+                    </ul>
                 </Display>
+
+                <div class="card-actions justify-end">
+                    <span class="inline-flex btn btn-accent px-6"
+                          disabled=@(!_walletAddress.IsWalletAddress())
+                          @onclick="async () => await SetWalletAddressAsync()">
+                        GO!
+                    </span>
+                </div>
             </div>
         </div>
-
-        <div class="pt-6">
-            <TitanoForecast Items="_titanoForecastItems" />
-        </div>
     </div>
-</CascadingValue>
+</Display>
+
+<Display If="_currentWalletAddress is not null">
+    <CascadingValue Name="State" Value="_state">
+        <Display If="_state?.InitialBalance is not null">
+            <TitanoTopBar />
+        </Display>
+
+        <div class="w-3/12 p-3 pt-0 flex flex-col">
+            <TitanoStats Holders="_titanoHolders" @ref="_titanoStats" />
+        </div>
+
+        <div class="w-9/12 p-4">
+            <div class="columns-1">
+                <div class="flex justify-end">
+                    <Display If="_titanoForecastItems is not null">
+                        <div class="btn-group opacity-90">
+                            @foreach (var currency in CurrenciesGroups.CurrenciesAvailable)
+                            {
+                                <button class="btn btn-sm @(_state?.Currency == currency ? "btn-primary" : "btn-outline")" @onclick="async () => await SetCurrencyAsync(currency)">
+                                    @currency
+                                </button>
+                            }
+                        </div>
+                    </Display>
+
+                    <button class="btn btn-sm btn-accent ml-4" @onclick="async () => await UnsetWalletAddressAsync()">
+                        @_currentWalletAddress.ShortWalletAddress()
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-6">
+                <TitanoForecast Items="_titanoForecastItems" />
+            </div>
+        </div>
+    </CascadingValue>
+</Display>
 
 @code {
+    private const string DefaultCurrency = Currencies.Usd;
+
     private State _state;
 
+    private ElementReference _walletAddressInput;
     private TitanoStats _titanoStats;
     private IReadOnlyCollection<CoinGeckoPriceHistoryItemWithCurrencyModel> _initialPriceHistory;
     private BscScanHoldersModel _titanoHolders;
     private IReadOnlyCollection<TitanoForecastItem> _titanoForecastItems;
+    private IList<string> _walletAddressHistory;
+    private bool _checkingWalletAddress;
+    private string _walletAddress;
+    private string _currentWalletAddress;
     private decimal _currentBalanceAmount;
     private string _connectedWallet;
-    private string _currentCurrency = Currencies.Usd;
+    private string _currentCurrency;
+
+    protected override void OnInitialized()
+    {
+        _checkingWalletAddress = true;
+    }
 
     protected override async Task OnAfterFirstRenderAndParametersSetAsync()
     {
-        await ConnectWalletAsync();
+        _walletAddress = await LocalStorageService.GetWalletAddressAsync(ct);
+        if (_walletAddress is not null)
+        {
+            await SetWalletAddressAsync();
+            _checkingWalletAddress = false;
+        }
+        else
+        {
+            _checkingWalletAddress = false;
+            _walletAddressHistory = await LocalStorageService.GetWalletAddressHistoryAsync(ct);
+
+            RefreshState(false);
+
+            await JsRuntime.InvokeAsync<string>(
+                "setFocusOnElementAsync",
+                _walletAddressInput);
+        }
+    }
+
+    private async Task SetWalletAddressAsync()
+    {
+        await LocalStorageService.StoreWalletAddressAsync(_walletAddress, ct);
+        await LocalStorageService.AddWalletAddressToHistoryIfNeededAsync(_walletAddress, ct);
+
+        _currentWalletAddress = _walletAddress;
+        _currentCurrency = await LocalStorageService.GetCurrencyAsync(ct) ?? DefaultCurrency;
+        _walletAddress = null;
+
+        _state = new(_currentCurrency);
+
+        await JsRuntime.InvokeAsync<string>(
+            "initAppAsync",
+            DotNetObjectReference.Create(this));
+
+        RefreshState(false);
+    }
+
+    private async Task UnsetWalletAddressAsync()
+    {
+        _currentWalletAddress = null;
+
+        await LocalStorageService.RemoveWalletAddressAsync(ct);
+
+        _state = null;
+        _titanoForecastItems = null;
+        _currentBalanceAmount = 0m;
+
+        _walletAddressHistory = await LocalStorageService.GetWalletAddressHistoryAsync(ct);
+
+        await JsRuntime.InvokeVoidAsync("resetAppAsync");
+
+        await JsRuntime.InvokeAsync<string>(
+            "setFocusOnElementAsync",
+            _walletAddressInput);
+
+        RefreshState(false);
+    }
+
+    private void GetTitanoEarnings()
+    {
+        if (_state.Balance is not null)
+        {
+            _state.Earnings = TitanoService.GetEarnings(
+            _state.Price.In(_state.Currency),
+            _state.Balance.BalanceAmount);
+        }
     }
 
     private async Task GetForecastAsync()
     {
         _titanoForecastItems = await TitanoService.GetForecastItemsAsync(
             _state.Price.In(_state.Currency),
-            _state.Balances.BalanceAmount);
+            _state.Balance.BalanceAmount);
     }
 
-    private async Task ConnectWalletAsync()
-    {        
-        await JsRuntime.InvokeAsync<string>(
-            "connectWalletAsync",
-            Wallets.Metamask,
-            Coins.Metadata[Coins.Titano].Contract,
-            DotNetObjectReference.Create(this));
+    private async Task SetCurrencyAsync(string currency)
+    {
+        _state.Currency = currency;
+        _state.Balance = _state.Balance.WithBalanceAmountValue(_currentBalanceAmount * _state.Price.In(_state.Currency));
+        _currentCurrency = currency;
+
+        await LocalStorageService.StoreCurrencyAsync(currency, ct);
+
+        GetTitanoEarnings();
+        await GetForecastAsync();
 
         RefreshState(false);
+    }
+
+    private async Task WalletAddressKeyDownAsync(KeyboardEventArgs e)
+    {
+        if ((e.Code == "Enter" || e.Code == "NumpadEnter") && _walletAddress.IsWalletAddress())
+        {
+            await SetWalletAddressAsync();
+        }
     }
 
     [JSInvokable]
-    public async Task SetConnectedWalletAsync(string wallet)
+    public async Task GetTitanoBalanceAsync()
     {
-        _state = new(_currentCurrency);
-        _connectedWallet = wallet;
-        RefreshState(false);
-    }
+        if (_state.Price is not null)
+        {
+            _state.Balance = TitanoService.GetBalance(
+                await BscScanService.GetCurrentBalanceAsync(_currentWalletAddress, Coins.Titano, ct),
+                _state.Price.In(_state.Currency));
 
-    [JSInvokable]
-    public async Task DisconnectWalletAsync()
-    {
-        await JsRuntime.InvokeVoidAsync("resetApp");
+            if (_state.Balance.HasChanged(_currentBalanceAmount))
+            {
+                await GetForecastAsync();
+                GetTitanoEarnings();
+                RefreshState(false);
+            }
 
-        _connectedWallet = null;
-        _titanoHolders = null;
-        _titanoForecastItems = null;
-        _currentBalanceAmount = 0;
-        _state.Clear();
-        RefreshState(false);
+            _currentBalanceAmount = _state.Balance.BalanceAmount;
+        }
     }
 
     [JSInvokable]
@@ -109,42 +236,14 @@
         var currentPrice = _state.Price?.In(_state.Currency) ?? 0m;
         _state.Price = await CoinGeckoService.GetTitanoPriceAsync(ct);
 
-        if (_state.Price?.HasChanged(currentPrice, _state.Currency) == true && _state.Balances is not null)
+        if (_state.Price?.HasChanged(currentPrice, _state.Currency) == true && _state.Balance is not null)
         {
             await GetForecastAsync();
+            GetTitanoEarnings();
             RefreshState(false);
         }
 
         await CoinGeckoService.GetMonthlyPriceHistoryAsync(Coins.Titano, ct);
-    }
-
-    [JSInvokable]
-    public async Task SetTitanoBalancesAsync(string balance)
-    {
-        if (_state.Price is not null)
-        {
-            _state.Balances = TitanoService.GetBalances(
-                balance,
-                _state.Price.In(_state.Currency));
-
-            if (_state.Balances.HasChanged(_currentBalanceAmount))
-            {
-                await GetForecastAsync();
-                RefreshState(false);
-            }
-
-            _currentBalanceAmount = _state.Balances.BalanceAmount;
-        }
-    }
-
-    [JSInvokable]
-    public void GetTitanoEarningsAsync()
-    {
-        _state.Earnings = TitanoService.GetEarnings(
-            _state.Price.In(_state.Currency),
-            _state.Balances.BalanceAmount);
-
-        RefreshState(false);
     }
 
     [JSInvokable]
@@ -167,30 +266,21 @@
     }
 
     [JSInvokable]
-    public async Task GetInitialBalanceAsync(string walletAddress)
+    public async Task GetInitialBalanceAsync()
     {
         _state.InitialBalance = await BscScanService.GetInitialBalanceAsync(
-            walletAddress,
+            _currentWalletAddress,
             Coins.Metadata[Coins.Titano].Contract,
             ct);
 
-        _state.InitialPrices = await CoinGeckoService.GetPriceHistoryValueAsync(
-            Coins.Titano,
-            _state.InitialBalance.CreatedAt.ToUniversalTime(),
-            ct);
+        if (_state.InitialBalance is not null)
+        {
+            _state.InitialPrices = await CoinGeckoService.GetPriceHistoryValueAsync(
+                Coins.Titano,
+                _state.InitialBalance.CreatedAt.ToUniversalTime(),
+                ct);
+        }
 
         StateHasChanged();
-    }
-
-    private async Task SetCurrencyAsync(string currency)
-    {
-        _state.Currency = currency;
-        _state.Balances = _state.Balances.WithBalanceAmountValue(_currentBalanceAmount * _state.Price.In(_state.Currency));
-        _currentCurrency = currency;
-
-        GetTitanoEarningsAsync();
-        await GetForecastAsync();
-
-        RefreshState(false);
     }
 }

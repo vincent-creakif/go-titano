@@ -1,12 +1,12 @@
 namespace Creakif.GoTitano.Models;
 
-public class BscScanResultModel
+public class BscScanInitialBalanceResultModel
 {
     [JsonPropertyName("result")]
-    public IEnumerable<BscScanResultItemModel> Items { get; set; }
+    public IEnumerable<BscScanInitialBalanceResultItemModel> Items { get; set; }
 }
 
-public class BscScanResultItemModel
+public class BscScanInitialBalanceResultItemModel
 {
     [JsonPropertyName("value")]
     public string ValueStr { get; set; }

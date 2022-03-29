@@ -17,7 +17,7 @@ public class BscScanService
         _timeZoneService = timeZoneService;
     }       
     
-    public async Task<BscScanResultItemModel> GetInitialBalanceAsync(
+    public async Task<BscScanInitialBalanceResultItemModel> GetInitialBalanceAsync(
         string walletAddress,
         string contractAddress,
         CancellationToken ct)
@@ -38,7 +38,7 @@ public class BscScanService
             var response = await _httpClient.GetAsync(uri, ct);
             var responseContent = await response.Content.ReadAsStringAsync(ct);
 
-            return (responseContent.JsonDeserializeCaseInsensitive<BscScanResultModel>()).Items.First();
+            return (responseContent.JsonDeserializeCaseInsensitive<BscScanInitialBalanceResultModel>()).Items.First();
         }
         catch (Exception)
         {
@@ -46,6 +46,32 @@ public class BscScanService
         }
 
         return null;
+    }
+
+    public async Task<decimal> GetCurrentBalanceAsync(string walletAddress, string coinId, CancellationToken ct)
+    {
+        var uri = _settings.ApiBaseUri
+            .AppendParameter("apikey", _settings.ApiKey)
+            .AppendParameter("module", "account")
+            .AppendParameter("action", "tokenbalance")
+            .AppendParameter("address", walletAddress)
+            .AppendParameter("contractaddress", Coins.Metadata[coinId].Contract)
+            .AppendParameter("tag", "latest");
+
+        try
+        {
+            var response = await _httpClient.GetAsync(uri, ct);
+            var responseContent = await response.Content.ReadAsStringAsync(ct);
+
+            return (responseContent.JsonDeserializeCaseInsensitive<BscScanTokenBalanceResultModel>())
+                .Result;
+        }
+        catch (Exception)
+        {
+
+        }
+
+        return 0m;
     }
 
     public async Task<BscScanHoldersModel> GetTotalHoldersAsync(string contractAddress, CancellationToken ct)

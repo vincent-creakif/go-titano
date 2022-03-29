@@ -1,4 +1,4 @@
-using Creakif.GoTitano.Settings;
+using Blazored.LocalStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,10 +7,13 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddOptions();
 
+builder.Services.AddTransient<LocalStorageService>();
 builder.Services.AddTransient<BscScanService>();
 builder.Services.AddTransient<CoinGeckoService>();
 builder.Services.AddScoped<TimeZoneService>();
 builder.Services.AddTransient<TitanoService>();
+
+builder.Services.AddBlazoredLocalStorage();
 
 var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 

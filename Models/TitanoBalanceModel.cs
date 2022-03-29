@@ -1,6 +1,6 @@
 namespace Creakif.GoTitano.Models;
 
-public record TitanoBalancesModel(
+public record TitanoBalanceModel(
     decimal BalanceAmount,
     decimal BalanceAmountValue)
 {
@@ -9,7 +9,7 @@ public record TitanoBalancesModel(
 
 public static class TitanoBalancesModelExtensions
 {
-    public static TitanoBalancesModel WithBalanceAmountValue(this TitanoBalancesModel titanoBalances, decimal balanceAmountValue)
+    public static TitanoBalanceModel WithBalanceAmountValue(this TitanoBalanceModel titanoBalances, decimal balanceAmountValue)
     {
         return titanoBalances with { BalanceAmountValue = balanceAmountValue };
     }

@@ -6,9 +6,6 @@ public static class DecimalExtensions
 
     public static decimal FromWeiValue(this string weiValue)
     {
-        var left = weiValue[..(weiValue.Length - 18)];
-        var right = weiValue[^18..];
-
-        return decimal.Parse($"{left}.{right}", _culture);
+        return decimal.Parse(weiValue[..^18] + "." + weiValue[^18..], _culture);
     }
 }

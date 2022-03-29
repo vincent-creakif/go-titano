@@ -11,5 +11,5 @@ public static class Coins
 
     public record CoinMetadata(
         string Contract,
-        string PlatformId);
+        string CoinGeckoPlatformId);
 }

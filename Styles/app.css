@@ -26,6 +26,24 @@ body {
     letter-spacing: .02rem;
 }
 
+.home-logo {
+    position: relative;
+    top: 25px;
+    width: 72px;
+    z-index: 10;
+}
+
+.wallet-address {
+    width: 30rem;
+}
+
+.wallet-address h1 {
+    padding: 15px 0;
+    font-family: 'Kaushan Script', cursive;
+    font-size: 1.7rem;
+    letter-spacing: .07rem;
+}
+
 .topbar {
     position: absolute;
     display: flex;
@@ -44,12 +62,13 @@ body {
     line-height: 2rem;
 }
 
-.titano {
-    display: inline-flex;
+.stats-logo {
     height: 74px;
+    display: inline-flex;
     justify-content: center;
 }
-.titano svg {
+.stats-logo img {
+    width: 64px;
     z-index: 10;
 }
 

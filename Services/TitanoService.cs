@@ -20,15 +20,11 @@ public class TitanoService
         _timeZoneService = timeZoneService;
     }
 
-    public TitanoBalancesModel GetBalances(string balance, decimal price)
+    public TitanoBalanceModel GetBalance(decimal balance, decimal price)
     {
-        if (decimal.TryParse(balance, NumberStyles.AllowDecimalPoint, _culture, out var balanceAmount))
-        {
-            return new(
-                balanceAmount,
-                balanceAmount * price);
-        }
-        return new(0, 0);
+        return new(
+            balance,
+            balance * price);
     }
 
     public TitanoEarningsModel GetEarnings(decimal price, decimal balance)

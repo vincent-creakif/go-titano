@@ -75,7 +75,7 @@
                         </div>
                     </Display>
 
-                    <button class="btn btn-sm btn-accent ml-4" @onclick="async () => await UnsetWalletAddressAsync()">
+                    <button class="btn btn-sm btn-accent ml-4" @onclick="async () => await UnsetWalletAddressAsync()" title="click to disconnect">
                         @_currentWalletAddress.ShortWalletAddress()
                     </button>
                 </div>

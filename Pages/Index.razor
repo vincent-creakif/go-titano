@@ -257,12 +257,13 @@
     }
 
     [JSInvokable]
-    public async Task SetRebaseCountdownAsync()
+    public async Task<int> SetRebaseCountdownAsync()
     {
         if (_titanoStats is not null)
         {
-            await _titanoStats.SetRebaseCountdownAsync();
+            return await _titanoStats.SetRebaseCountdownAsync();
         }
+        return 0;
     }
 
     [JSInvokable]

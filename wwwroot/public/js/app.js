@@ -1,12 +1,10 @@
-﻿let _dotNetObjectRef;
+﻿const PriceCheckIntervalDelayInSec = 10
+// Check current balance when rebase countdown value in seconds is equal to
+const CheckCurrentBalanceWhenRebaseCountdownEquals = (22 * 60) + 1 // when rebase countdown = 28:01
 
-const _priceCheckIntervalDelayInSec = 10;
-let _priceCheckInterval;
-
-const _currentBalanceCheckIntervalInSec = 1200; // every 20 minutes
-let _currentBalanceCheckInterval;
-
-let _rebaseCountdownInterval;
+let _dotNetObjectRef
+let _priceCheckInterval
+let _rebaseCountdownInterval
 
 async function initAppAsync(dotNetObjectRef) {
     _dotNetObjectRef = dotNetObjectRef
@@ -16,18 +14,14 @@ async function initAppAsync(dotNetObjectRef) {
     await getInitialBalanceAsync()
     await setRebaseCountDownAsync()
 
-    _currentBalanceCheckInterval = setInterval(
-        async () => getCurrentBalanceAsync(), _currentBalanceCheckIntervalInSec * 1000)
-
     _priceCheckInterval = setInterval(
-        async () => getTitanoPriceAsync(), _priceCheckIntervalDelayInSec * 1000)
+        async () => getTitanoPriceAsync(), PriceCheckIntervalDelayInSec * 1000)
 
     _rebaseCountdownInterval = setInterval(
         async () => setRebaseCountDownAsync(), 1000)
 }
 
 function resetAppAsync() {
-    clearInterval(_currentBalanceCheckInterval)
     clearInterval(_priceCheckInterval)
     clearInterval(_rebaseCountdownInterval)
     _dotNetObjectRef = null
@@ -54,5 +48,8 @@ async function getInitialBalanceAsync() {
 }
 
 async function setRebaseCountDownAsync() {
-    await _dotNetObjectRef.invokeMethodAsync("SetRebaseCountdownAsync");
+    var countdownValue = await _dotNetObjectRef.invokeMethodAsync("SetRebaseCountdownAsync")
+    if (countdownValue == CheckCurrentBalanceWhenRebaseCountdownEquals) {
+        await getCurrentBalanceAsync()
+    }
 }

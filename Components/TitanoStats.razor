@@ -107,12 +107,11 @@
 
     [Parameter]
     public BscScanHoldersModel Holders { get; set; }    
-    
+
     private int? _rebaseCountdownMinutes;
     private int? _rebaseCountdownSeconds;
-    
-    [JSInvokable]
-    public async Task SetRebaseCountdownAsync()
+
+    public async Task<int> SetRebaseCountdownAsync()
     {
         var rebaseTime = TitanoService.RebaseTime;
 
@@ -125,5 +124,7 @@
         }
 
         StateHasChanged();
+
+        return _rebaseCountdownMinutes.Value * 60 + _rebaseCountdownSeconds.Value;
     }
 }

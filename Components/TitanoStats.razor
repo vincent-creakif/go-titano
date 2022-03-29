@@ -120,7 +120,8 @@
 
         if (_rebaseCountdownSeconds == 60)
         {
-            _rebaseCountdownSeconds--;
+            _rebaseCountdownMinutes++;
+            _rebaseCountdownSeconds = 0;
         }
 
         StateHasChanged();

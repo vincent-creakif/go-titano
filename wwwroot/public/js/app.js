@@ -1,6 +1,6 @@
 ﻿const PriceCheckIntervalDelayInSec = 10
 // Check current balance when rebase countdown value in seconds is equal to
-const CheckCurrentBalanceWhenRebaseCountdownEquals = (22 * 60) + 1 // when rebase countdown = 28:01
+const CheckCurrentBalanceWhenRebaseCountdownEquals = (29 * 60) // when rebase countdown = 29:00
 
 let _dotNetObjectRef
 let _priceCheckInterval

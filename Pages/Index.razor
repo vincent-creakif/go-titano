@@ -63,23 +63,25 @@
             <TitanoStats Holders="_titanoHolders" @ref="_titanoStats" />
         </div>
 
-        <div class="w-9/12 p-4 relative">
+        <div class="w-9/12 p-4">
             <div class="columns-1">
                 <div class="flex justify-end">
-                    <Display If="_titanoForecastItems is not null">
-                        <div class="btn-group opacity-90">
-                            @foreach (var currency in CurrenciesGroups.CurrenciesAvailable)
-                            {
-                                <button class="btn btn-sm @(_state?.Currency == currency ? "btn-primary" : "btn-outline")" @onclick="async () => await SetCurrencyAsync(currency)">
-                                    @currency
-                                </button>
-                            }
-                        </div>
-                    </Display>
+                    <span class="flex relative z-10">
+                        <Display If="_titanoForecastItems is not null">
+                            <div class="btn-group opacity-90">
+                                @foreach (var currency in CurrenciesGroups.CurrenciesAvailable)
+                                {
+                                    <button class="btn btn-sm @(_state?.Currency == currency ? "btn-primary" : "btn-outline")" @onclick="async () => await SetCurrencyAsync(currency)">
+                                        @currency
+                                    </button>
+                                }
+                            </div>
+                        </Display>
 
-                    <button class="btn btn-sm btn-accent ml-4" @onclick="async () => await UnsetWalletAddressAsync()" title="click to disconnect">
-                        @_currentWalletAddress.ShortWalletAddress()
-                    </button>
+                        <button class="btn btn-sm btn-accent ml-4" @onclick="async () => await UnsetWalletAddressAsync()" title="click to disconnect">
+                            @_currentWalletAddress.ShortWalletAddress()
+                        </button>
+                    </span>
                 </div>
             </div>
 

@@ -1,4 +1,7 @@
-﻿async function connectionDown(options) {
+﻿const MaxConnectionRetries = 30;
+const MaxConnectionRetryIntervalInMs = 500;
+
+async function connectionDown(options) {
     console.log("Connection Down!");
     for (let i = 0; i < options.maxRetries; i++) {
         await this.delay(options.retryIntervalMilliseconds);
@@ -33,8 +36,8 @@ function connectionUp(e) {
 
 window.Blazor.start({
     reconnectionOptions: {
-        maxRetries: 15,
-        retryIntervalMilliseconds: 500,
+        maxRetries: MaxConnectionRetries,
+        retryIntervalMilliseconds: MaxConnectionRetryIntervalInMs,
     },
     reconnectionHandler: {
         onConnectionDown: e => connectionDown(e),
